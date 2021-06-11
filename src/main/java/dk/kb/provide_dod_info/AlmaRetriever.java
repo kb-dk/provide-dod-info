@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static dk.kb.provide_dod_info.Constants.XPATH_FIND_AUTHOR;
 import static dk.kb.provide_dod_info.Constants.XPATH_FIND_IDENTIFIER;
 import static dk.kb.provide_dod_info.Constants.XPATH_FIND_IDENTIFIER_TYPE;
 import static dk.kb.provide_dod_info.Constants.XPATH_FIND_YEAR;
@@ -165,7 +166,14 @@ public class AlmaRetriever {
                     String year = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
                     res = year;
                     break;
-                    }
+
+                case "AUTHOR":
+                    XPathExpression authorXpath = xpath.compile(XPATH_FIND_AUTHOR);
+                    String author = (String) authorXpath.evaluate(doc, XPathConstants.STRING);
+                    res = author;
+                    break;
+            }
+
 
 //                    XPathExpression issuedYearTypeXpath = xpath.compile(XPATH_FIND_YEAR_TYPE);
 //                    String yearType = (String) issuedYearTypeXpath.evaluate(doc, XPathConstants.STRING);
@@ -340,9 +348,9 @@ public class AlmaRetriever {
                 row++;
                 // todo: extract data below and add correct values
 //                String place = getDataFromMarcXml(place, ?);
-//                String place = getDataFromMarcXml(author, ); etc
+                String author = getDataFromModsXml(marcFile, barcode, "AUTHOR");
                 data.put(String.valueOf(row), new Object[]{barcode, "OK", year, "testSted" + row,
-                    "testForfatter" + row, "testTitel" + row});
+                    author, "testTitel" + row});
 
                 out.flush();
 //            }

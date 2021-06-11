@@ -26,9 +26,9 @@ public class Constants {
     /** The XPATH for extracting the IdentifierType from the pubhub Book xml file.*/
     public static final String XPATH_FIND_IDENTIFIER_TYPE = "/*[local-name()='Book']/*[local-name()='IdentifierType']/text()";
 
-    /** The XPATH for extracting the Identifier from the pubhub Book xml file.*/
+    /** The XPATH for extracting the dateIssued from the generated alma mods.xml */
     public static final String XPATH_FIND_YEAR = "/*[local-name()='mods']/*[local-name()='originInfo']/*[local-name()='dateIssued']/text()";
-    /** The XPATH for extracting the IdentifierType from the pubhub Book xml file.*/
-    public static final String XPATH_FIND_YEAR_TYPE = "/*[local-name()='Book']/*[local-name()='IdentifierType']/text()";
+    /** The XPATH for extracting the Author from the generated alma mods.xml*/
+    public static final String XPATH_FIND_AUTHOR = "/*[local-name()='mods']/*[local-name()='IdentifierType']/text()";
 
 }
