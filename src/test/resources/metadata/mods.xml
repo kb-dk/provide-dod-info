@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="http://www.loc.gov/mods/v3"
+      version="3.5"
+      xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+   <titleInfo>
+      <title>Der var engang en barndom</title>
+      <subTitle> barndomserindringer</subTitle>
+   </titleInfo>
+   <name type="personal" usage="primary">
+      <namePart type="family">Vagt</namePart>
+      <namePart type="given">Ingeborg</namePart>
+      <role>
+         <roleTerm authority="marcrelator" type="code">aut</roleTerm>
+      </role>
+      <role>
+         <roleTerm authority="marcrelator" type="code">aut</roleTerm>
+      </role>
+   </name>
+   <name>
+      <namePart>Camilla Faieq Jensen</namePart>
+      <role>
+         <roleTerm authority="marcrelator" type="code">edt</roleTerm>
+      </role>
+   </name>
+   <typeOfResource/>
+   <originInfo>
+      <dateIssued>2012</dateIssued>
+      <publisher>Mellemgaard</publisher>
+   </originInfo>
+   <language>
+      <languageTerm authority="iso639-2b" type="code">dan</languageTerm>
+   </language>
+   <physicalDescription>
+      <extent>129 sider</extent>
+   </physicalDescription>
+   <note type="statement of responsibility" altRepGroup="00"/>
+   <classification authority="ddc">99.4 Vagt Ingeborg</classification>
+   <location>
+      <physicalLocation/>
+   </location>
+   <location>
+      <url displayLabel="electronic resource"
+           usage="primary display"
+           note="Adgangsmåde: Internet Adgang til køb ved udgivelsen">http://www.mellemgaard.dk/product.asp?product=348</url>
+   </location>
+   <identifier type="isbn">9788792875068</identifier>
+   <recordInfo>
+      <recordOrigin>Converted from MARCXML to MODS version 3.4 using MARC21slim2MODS3-4.xsl
+      (Revision 1.94 2014/02/21)</recordOrigin>
+   </recordInfo>
+</mods>

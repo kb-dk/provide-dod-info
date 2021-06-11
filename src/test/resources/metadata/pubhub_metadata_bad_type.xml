@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- THIS IS A TEST FILE, AND MUCH HAVE BEEN CHANGED FROM THE ORIGINAL EXTRACT FROM PUBLIZON.-->
+<Book xmlns="http://service.pubhub.dk/">
+    <BookType>Ebog</BookType>
+    <FileType>epub</FileType>
+    <BookId>19429dc3-81b9-4ef8-b388-9e22159cfcea</BookId>
+    <Identifier>9788711436981</Identifier>
+    <IdentifierType>UUID</IdentifierType>
+    <Title>TEST - THIS IS A TEST</Title>
+    <Language>dan</Language>
+    <PublicationDate/>
+    <PrereleaseDate/>
+    <ImprintName/>
+    <PublisherName/>
+    <MainDescription>THIS IS A TEST</MainDescription>
+    <DigitalProtection/>
+    <Price CurrencyCode="DKK"/>
+    <RecommendedPrice CurrencyCode="DKK"/>
+    <Contributors/>
+    <NumberOfPages/>
+    <FileSize/>
+    <FileVersion/>
+    <BookFormat/>
+    <SubscriptionSaleAllowed/>
+    <Authors/>
+    <SampleUddrl/>
+    <RightList/>
+    <Subjects>
+        <SimpleSubject>
+            <Code>3MP</Code>
+            <Description>TESTS</Description>
+        </SimpleSubject>
+    </Subjects>
+    <Images>
+        <Image Type="Forside">http://images.pubhub.dk/originals/19429dc3-81b9-4ef8-b388-9e22159cfcea.jpg</Image>
+        <Image Type="ForsideMiniature">http://images.pubhub.dk/thumbnails/19429dc3-81b9-4ef8-b388-9e22159cfcea.jpg</Image>
+    </Images>
+    <PriceBeforeDiscount CurrencyCode="DKK">1.00</PriceBeforeDiscount>
+</Book>
