@@ -62,6 +62,8 @@ public class AlmaMetadataRetriever {
      * Using '*' as wildcard for the namespace.*/
     protected static final String XPATH_MARC_RECORD = "/*[local-name()='searchRetrieveResponse']/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']";
 
+
+
     /** The configuration.*/
     protected final Configuration conf;
     /** The HTTP client for making the HTTP Get operations towards the Alma server.*/
@@ -99,11 +101,12 @@ public class AlmaMetadataRetriever {
         ArgumentCheck.checkNotNull(out, "OutputStream out");
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        retrieveAlmaMetadataBarcode(barcode, byteArrayOutputStream);
+        retrieveAlmaMetadataBarcode(barcode, byteArrayOutputStream); //MARC/MODS
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
-        extractModsFromAlma(byteArrayInputStream, out);
+//        extractModsFromAlma(byteArrayInputStream, out);
+        extractMarcFromAlma(byteArrayInputStream, out);
     }
 
     /**
@@ -131,7 +134,7 @@ public class AlmaMetadataRetriever {
         log.debug("Retrieving Alma metadata for Barcode: " + barcode);
 
         try {
-            String requestUrl = conf.getAlmaSruSearch() + ALMA_SEARCH_RANGE + ALMA_SCHEMA_MODS + ALMA_QUERY_BARCODE + barcode;
+            String requestUrl = conf.getAlmaSruSearch() + ALMA_SEARCH_RANGE + ALMA_SCHEMA_MARCXML /*ALMA_SCHEMA_MODS*/ + ALMA_QUERY_BARCODE + barcode;
             httpClient.retrieveUrlContent(requestUrl, out);
         } catch (IOException e) {
             throw new IllegalStateException("Could not download the metadata for set '" + barcode + "'", e);

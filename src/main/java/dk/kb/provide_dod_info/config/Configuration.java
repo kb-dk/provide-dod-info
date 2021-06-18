@@ -68,6 +68,7 @@ public class Configuration {
 //    public static final String CONF_AUDIO_FORMATS = "audio_formats";
     /** The directory where the output statistics will be placed.*/
     public static final String CONF_OUT_DIR = "out_dir";
+    public static final String CONF_CUT_YEAR = "cut_year";
 
     /** The configuration Alma sru search base url.*/
     public static final String CONF_ALMA_SRU_SEARCH = "alma_sru_search";
@@ -80,7 +81,7 @@ public class Configuration {
 //    protected final File abookOutputDir;
     /** The directory for the output  files.*/
     protected final File outDir;
-
+    protected final Integer cutYear;
 
     /** The configuration for the alma sru search.*/
     protected final String almaSruSearchConfiguration;
@@ -97,15 +98,18 @@ public class Configuration {
 //        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_AUDIO_OUTPUT_DIR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_OUT_DIR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_ALMA_SRU_SEARCH, "confMap");
+        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CORPUS_FILE_DIR, "confMap");
+        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CUT_YEAR, "confMap");
 
         ebookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_EBOOK_OUTPUT_DIR));
 //        abookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_AUDIO_OUTPUT_DIR));
-        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CORPUS_FILE_DIR, "confMap");
+
         this.outDir = FileUtils.createDirectory((String) confMap.get(CONF_OUT_DIR));
 
         this.corpusOrigDir = FileUtils.createDirectory ((String) confMap.get(CONF_CORPUS_FILE_DIR));
 
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
+        this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
 
     }
 
@@ -132,6 +136,9 @@ public class Configuration {
         return outDir;
     }
 
+    public Integer getCutYear() {
+        return cutYear;
+    }
     /**
      * Creates a configuration from a file.
      * @param yamlFile The YAML file with the configuration.

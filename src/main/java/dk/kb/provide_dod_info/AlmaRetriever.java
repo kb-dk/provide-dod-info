@@ -4,24 +4,15 @@ import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.exception.ArgumentCheck;
 import dk.kb.provide_dod_info.metadata.AlmaMetadataRetriever;
 import dk.kb.provide_dod_info.metadata.MetadataValidator;
+import dk.kb.provide_dod_info.utils.ExcelUtils;
 import dk.kb.provide_dod_info.utils.FileUtils;
-import dk.kb.provide_dod_info.utils.LinuxCmdUtil;
+import dk.kb.provide_dod_info.utils.UxCmdUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,19 +22,28 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
-import static dk.kb.provide_dod_info.Constants.XPATH_FIND_AUTHOR;
-import static dk.kb.provide_dod_info.Constants.XPATH_FIND_IDENTIFIER;
-import static dk.kb.provide_dod_info.Constants.XPATH_FIND_IDENTIFIER_TYPE;
-import static dk.kb.provide_dod_info.Constants.XPATH_FIND_YEAR;
+import static dk.kb.provide_dod_info.Constants.*;
+import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
+//import static dk.kb.provide_dod_info.Constants.XPATH_FIND_IDENTIFIER_TYPE;
+//import static dk.kb.provide_dod_info.Constants.XP_MARC_FIND_AUTHOR;
+//import static dk.kb.provide_dod_info.Constants.XP_MARC_FIND_PUBLISHER;
+//import static dk.kb.provide_dod_info.Constants.XP_MARC_FIND_PUBPLACE;
+//import static dk.kb.provide_dod_info.Constants.XP_MARC_FIND_TITLE;
+//import static dk.kb.provide_dod_info.Constants.XP_MARC_FIND_YEAR;
+//import static dk.kb.provide_dod_info.Constants.releaseYear;
+//import static dk.kb.provide_dod_info.Constants.ExtractInfo.YEAR;
+//import static dk.kb.provide_dod_info.Constants.ExtractInfo.AUTHOR;
+//import static dk.kb.provide_dod_info.Constants.ExtractInfo.TITLE;
+//import static dk.kb.provide_dod_info.Constants.ExtractInfo.PUBPLACE;
+//import static dk.kb.provide_dod_info.Constants.ExtractInfo.PUBLISHER;
 
 // todo: update description
 /**
@@ -71,6 +71,8 @@ public class AlmaRetriever {
     protected final XPathFactory xPathfactory;
     /** The row used in the excel-sheet*/
     private int row;
+    private int cutYear;
+
     /**
      * Constructor.
      * @param conf The configuration.
@@ -85,6 +87,7 @@ public class AlmaRetriever {
         this.xPathfactory = XPathFactory.newInstance();
         this.validator = new MetadataValidator();
         this.row = 0;
+        this.cutYear = conf.getCutYear();
     }
 
     /**
@@ -117,14 +120,14 @@ public class AlmaRetriever {
 
         Map<String, Object[]> data = new TreeMap<>();
         row++;
-        data.put(String.valueOf(row), new Object[] {"Barcode", "Extract Result", "Date", "Place", "Author", "Title"});
+        data.put(String.valueOf(row), new Object[] {"Barcode", "AlmaExtract", "Date", "Place", "Author", "Publisher",
+                "Classification", "Title"});
 
         traverseFilesInFolder(conf.getCorpusOrigDir(), data);
 
         XSSFSheet sheet = workbook.createSheet("Alma results");
-        populateSheet(sheet, data);
-        setWorkbookFormats(workbook, sheet);
-
+        ExcelUtils.populateSheet(sheet, data);
+        ExcelUtils.setWorkbookFormats(workbook, sheet);
     }
 
     /**
@@ -137,59 +140,58 @@ public class AlmaRetriever {
      * @return The ISBN number, or null if no ISBN could be found.
      */
 
-    protected String getDataFromModsXml(File file, String barcode, String data) {
+    protected String getDataFromXml(File file, Constants.ExtractInfo extractInfo) {
         File barcodeMetadataFile = FileUtils.getExistingFile(file.toString()); //   new File(dir, barcode + Constants.MARC_METADATA_SUFFIX);
-//        if(!barcodeMetadataFile.isFile()) {
-//            log.warn("No metadata file for '" + barcode + "', thus cannot extract DateIssued. "
-//                + "Returning a null.");
-//            return null;
-//        }
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(barcodeMetadataFile);
             XPath xpath = xPathfactory.newXPath();
-            String res = null;
-            switch (data) {
-                case  "ISBN":
-                    XPathExpression identifierXpath = xpath.compile(XPATH_FIND_IDENTIFIER);
-                    XPathExpression identifierTypeXpath = xpath.compile(XPATH_FIND_IDENTIFIER_TYPE);
-                    String idType = (String) identifierTypeXpath.evaluate(doc, XPathConstants.STRING);
-                    if (!idType.startsWith(data) && !idType.startsWith("GTIN13")) {
-                        log.info("Not an ISBN or GTIN13 type of identifier. Found: '" + idType + "'. Returning a null.");
-                        return null;
-                    }
-                    res = (String) identifierXpath.evaluate(doc, XPathConstants.STRING);
+            String res = "";
+            switch (extractInfo) {
+                case YEAR:
+                    XPathExpression issuedYearXpath = xpath.compile(XP_MARC_FIND_YEAR);
+                    String  rYr = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
+                    releaseYear = rYr.substring(7,11);
+                    res = releaseYear;
                     break;
-
-                case "YEAR":
-                    XPathExpression issuedYearXpath = xpath.compile(XPATH_FIND_YEAR);
-                    String year = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
-                    res = year;
-                    break;
-
-                case "AUTHOR":
-                    XPathExpression authorXpath = xpath.compile(XPATH_FIND_AUTHOR);
+                case AUTHOR:
+                    XPathExpression authorXpath = xpath.compile(XP_MARC_FIND_AUTHOR);
                     String author = (String) authorXpath.evaluate(doc, XPathConstants.STRING);
-                    res = author;
+                    if (StringUtils.isNotEmpty(author)) {
+                        res = author;
+                    } else {res = "N/A";}
+                    break;
+                case TITLE:
+                    XPathExpression titleXpath = xpath.compile(XP_MARC_FIND_TITLE);
+                    res = (String) titleXpath.evaluate(doc, XPathConstants.STRING);
+                    break;
+                case PUBPLACE:
+                    XPathExpression pubPlaceXpath = xpath.compile(XP_MARC_FIND_PUBPLACE);
+                    String pubPlace = (String) pubPlaceXpath.evaluate(doc, XPathConstants.STRING);
+                    if (StringUtils.isNotEmpty(pubPlace)) {
+                        res = pubPlace;
+                    } else { res = "N/A";}
+                    break;
+                case PUBLISHER:
+                    XPathExpression publisherXpath = xpath.compile(XP_MARC_FIND_PUBLISHER);
+                    String publisher = (String) publisherXpath.evaluate(doc, XPathConstants.STRING);
+                    if (StringUtils.isNotEmpty(publisher)) {
+                        res = publisher;
+                    } else { res = "N/A";}
+                    break;
+                case CLASSIFICATION:
+                    XPathExpression classificationXpath = xpath.compile(XP_MARC_FIND_CLASSIFICATION);
+                    String classification = (String) classificationXpath.evaluate(doc, XPathConstants.STRING);
+                    if (StringUtils.isNotEmpty(classification)) {
+                        res = classification;
+                    } else { res = "N/A";}
                     break;
             }
 
-
-//                    XPathExpression issuedYearTypeXpath = xpath.compile(XPATH_FIND_YEAR_TYPE);
-//                    String yearType = (String) issuedYearTypeXpath.evaluate(doc, XPathConstants.STRING);
-//                    if (!yearType.startsWith(data)) {
-//                        log.info("Not a YEAR type of identifier. Found: '" + yearType + "'. Returning a null.");
-//                        return null;
-//                    }
-//                    res = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
-
-
-
-
             return res;
+
         } catch (Exception e) {
-            log.warn("Could not extract the 'DateIssued' from the file '" + barcodeMetadataFile + "'. Returning a null",
-                e);
+            log.warn("Could not extract {} from the file '{} '. Returning a null", extractInfo.name(), barcodeMetadataFile, e);
             return null;
         }
     }
@@ -233,7 +235,9 @@ public class AlmaRetriever {
         String fileName = file.getName();
         String barcode;
         try {
-            barcode = fileName.substring(0, fileName.indexOf("-bw"));
+            barcode = fileName.replaceAll("-bw.pdf", "").replaceAll(".marc.xml", "");
+//            barcode = fileName.substring(0, fileName.indexOf("-bw")); //todo: must be sorted to have only correct .pdf-files
+
         } catch (Exception e) {
             log.debug("Wrong file format. Barcode could not be retrieved, returning 'null'");
             e.printStackTrace();
@@ -246,7 +250,7 @@ public class AlmaRetriever {
 
     /**
      * Traverses the books in the base directory to retrieve the Alma metadata.
-     * @param baseBookDir The base directory for the books (either E-books or Audio books).
+//     * @param baseBookDir The base directory for the books (either E-books or Audio books).
      */
 //    protected void traverseBooksInFolder(File baseBookDir, Map<String, Object[]> data) {
 //        File[] files = baseBookDir.listFiles();
@@ -268,7 +272,11 @@ public class AlmaRetriever {
      * @param dir The base directory for the pdf-files.
      */
     private void traverseFilesInFolder(File dir, Map<String, Object[]> data) {
-        File[] files = dir.listFiles();
+
+        FilenameFilter filter = (f, name) -> {
+            return name.endsWith(".pdf");
+        };
+        File[] files = dir.listFiles(filter);
         if(files == null) {
             row++;
             data.put(String.valueOf(row), new Object[] {"", "No files to retrieve and get Alma metadata for in this directory: "
@@ -276,15 +284,15 @@ public class AlmaRetriever {
             log.warn("No files to retrieve and transform Alma metadata for within the directory: "
                 + dir.getAbsolutePath());
         } else {
-//            List<String> barcodes = new ArrayList<>();
             for(File file : files) {
                 String barcode = getBarcode(file);
-//                barcodes.add(barcode);
                 if (StringUtils.isNotEmpty(barcode)){
-                    // Create the textfile from the pdf
-                    LinuxCmdUtil.execCmd("pdftotext", file.toString(), conf.getOutDir().getAbsolutePath() + "/" + barcode + ".txt");
-
                     retrieveMetadataForBarcode(dir, barcode, data);
+                    // Create the textfile from the pdf
+                    if (Integer.parseInt(releaseYear) < cutYear) {
+                        UxCmdUtils.execCmd("pdftotext", file.toString(), conf.getOutDir().getAbsolutePath()
+                                + "/" + barcode + ".txt");
+                    }
                 }
 
             }
@@ -293,13 +301,13 @@ public class AlmaRetriever {
 
     /**
      * Retrieve the metadata for a given barcode.
-     * It retrieves the Alma metadata in MARC put the result in outDir from Yaml configuration file.
-     * @param dir The book package directory, where the Publizon metadata already is placed.
+     * It retrieves the Alma metadata in MARC/MODS put the result in outDir from Yaml configuration file.
+     * @param dir The directory, where the metadata-file will be placed.
      */
     protected void retrieveMetadataForBarcode(File dir, String barcode, Map<String, Object[]> data) {
         try {
-            File marcMetadataFile = new File(conf.getOutDir(), barcode + Constants.MODS_METADATA_SUFFIX);
-            getAlmaMetadataForBarcode(barcode, marcMetadataFile, data);
+            File metadataFile = new File(conf.getOutDir(), barcode + Constants.MARC_METADATA_SUFFIX);
+            getAlmaMetadataForBarcode(barcode, metadataFile, data);
         } catch (Exception e) {
             log.info("Non-critical failure while trying to retrieve the Alma metadata for the book directory '"
                 + dir.getAbsolutePath() + "'", e);
@@ -331,32 +339,42 @@ public class AlmaRetriever {
 //    }
 
     /**
-     * Retrieves the Alma MARC record metadata file for a given barcode.
+     * Retrieves the Alma  record metadata file for a given barcode.
      * "OK" is written in the excel sheet if success and data is added.
      * A fail message is written in the excel sheet if no data is retrieved.
      * @param barcode The barcode for The Item, whose metadata record will be retrieved.
-     * @param marcFile The output file where the MODS will be placed.
+     * @param xmlFile The output file where the MODS/MARC will be placed.
      * @throws IOException If it somehow fails to retrieve or write the output file.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void getAlmaMetadataForBarcode(String barcode, File marcFile, Map<String, Object[]> data) throws IOException {
-        try (OutputStream out = new FileOutputStream(marcFile)) {
-            almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out); // make marc.xml-file
+    protected void getAlmaMetadataForBarcode(String barcode, File xmlFile, Map<String, Object[]> data) throws IOException {
+        try (OutputStream out = new FileOutputStream(xmlFile)) {
+            // Retrieve metadata for barcode and put it in .xml-file
+            almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out); // HERE marc/mods.xml-file IS MADE
 
-            String year = getDataFromModsXml(marcFile, barcode, "YEAR");
-//            if (Integer.parseInt(year) < 1881) { //todo: make 1881 configurable
+            String year = getDataFromXml(xmlFile, YEAR );
+            if (Integer.parseInt(year) < cutYear) {
                 row++;
-                // todo: extract data below and add correct values
-//                String place = getDataFromMarcXml(place, ?);
-                String author = getDataFromModsXml(marcFile, barcode, "AUTHOR");
-                data.put(String.valueOf(row), new Object[]{barcode, "OK", year, "testSted" + row,
-                    author, "testTitel" + row});
-
+                // todo: extract data below and add correct values, ongoing...
+//
+                String author = getDataFromXml(xmlFile, AUTHOR);
+                String title = getDataFromXml(xmlFile, TITLE);
+                String pubPlace = getDataFromXml(xmlFile, PUBPLACE);
+                String publisher = getDataFromXml(xmlFile, PUBLISHER);
+                String classification = getDataFromXml(xmlFile, CLASSIFICATION);
+                // 653
+                data.put(String.valueOf(row), new Object[]{barcode, "OK", year, pubPlace, author, publisher,
+                        classification, title});
                 out.flush();
-//            }
+
+
+            }
         } finally {
-            if(marcFile.exists() && marcFile.length() == 0) {
-                marcFile.delete();
+            if (xmlFile.exists() && (Integer.parseInt(releaseYear) > 1881)){
+                xmlFile.delete();
+            }
+            if(xmlFile.exists() && xmlFile.length() == 0) {
+                xmlFile.delete();
                 row++;
                 data.put(String.valueOf(row), new Object[] {barcode, "No marc data retrieved from Alma."});
                 log.info("No marc data retrieved for Barcode: {}", barcode);
@@ -392,88 +410,10 @@ public class AlmaRetriever {
 //        }
 //    }
 
-    /**
-     * Add the collected data to the excel sheet
-     * @param sheet The sheet
-     * @param data The data
-     */
-    private void populateSheet(XSSFSheet sheet, Map<String, Object[]> data) {
-        Set<String> keyset = data.keySet();
-        int rowNumber = 0;
-        for (String key : keyset)
-        {
-            XSSFRow row = sheet.createRow(rowNumber++);
-            Object [] objArr = data.get(key);
-            int cellNumber = 0;
-            for (Object obj : objArr)
-            {
-                XSSFCell cell = row.createCell(cellNumber++);
-                if(obj instanceof String)
-                    cell.setCellValue((String)obj);
-                else if(obj instanceof Integer)
-                    cell.setCellValue((Integer)obj);
-            }
-            sheet.autoSizeColumn(0);
-            sheet.autoSizeColumn(1);
-        }
-    }
-
-    private void setWorkbookFormats(XSSFWorkbook workbook, XSSFSheet sheet) {
-        XSSFCellStyle defaultCellStyle = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontName(XSSFFont.DEFAULT_FONT_NAME);
-        defaultCellStyle.setFont(font);
-        sheet.setDefaultColumnStyle(0, defaultCellStyle);
-        sheet.setDefaultColumnStyle(1, defaultCellStyle);
-        sheet.setDefaultColumnStyle(2, defaultCellStyle);
-        sheet.setDefaultColumnStyle(3, defaultCellStyle);
-        sheet.setDefaultColumnStyle(4, defaultCellStyle);
-        sheet.setDefaultColumnStyle(5, defaultCellStyle);
-
-        XSSFCellStyle cellStyleErrorCells = workbook.createCellStyle();
-        XSSFFont fontErrorCells = workbook.createFont();
-        fontErrorCells.setColor(IndexedColors.RED.getIndex());
-        cellStyleErrorCells.setFont(fontErrorCells);
-        for (Row row : sheet){
-            Cell descriptions = row.getCell(1);
-            final String stringCellValue = descriptions.getStringCellValue();
-            if (stringCellValue.startsWith("No")){
-                descriptions.setCellStyle(cellStyleErrorCells);
-            }
-        }
-
-        XSSFRow topRow = sheet.getRow(0);
-        XSSFCellStyle cellStyleTopRow = workbook.createCellStyle();
-        XSSFFont fontTopRow = workbook.createFont();
-        fontTopRow.setBold(true);
-        cellStyleTopRow.setFont(fontTopRow);
-        cellStyleTopRow.setBorderBottom(BorderStyle.MEDIUM);
-        topRow.setRowStyle(cellStyleTopRow);
-
-    }
 
 
 
     /* Currently unused methods */
-    /**
-     * Get list of ISBN for all books; both E-books and Audio books.
-     * Will not retrieve the metadata, if it has already been retrieved.
-     *
-     * If the e-book package base directory and the audio book package base directory are the same, then they
-     * are only traversed once.
-     */
-//    protected List<String> getIsbnListFromPubHub() {
-//        List<String> result;
-//        result = retrieveIsbnForBooksInFolder(conf.getEbookOutputDir());
-//        if(conf.getEbookOutputDir().getAbsolutePath().equals(conf.getAudioOutputDir().getAbsolutePath())) {
-//            log.debug("Ebooks and Audio books have same base-dir.");
-//        } else {
-//            List<String> audioIsbns;
-//            audioIsbns = retrieveIsbnForBooksInFolder(conf.getAudioOutputDir());
-//            result.addAll(audioIsbns);
-//        }
-//        return result;
-//    }
 
     /**
      * Traverses the books in the base directory to retrieve ISBNs.

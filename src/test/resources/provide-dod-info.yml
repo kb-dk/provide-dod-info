@@ -7,6 +7,7 @@ provide-dod-info:
 #  audio_orig_dir: tempDir/downloaded_audio_files
   corpus_orig_dir: /home/dahe/Documents/DKM-048/dkm-048-testfiler
   out_dir: /home/dahe//Documents/EbookTest/
+  cut_year: 1881
 #  ebook_formats:
 #    - pdf
 #    - epub

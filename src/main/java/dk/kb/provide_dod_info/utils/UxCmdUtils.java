@@ -7,15 +7,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-public class LinuxCmdUtil {
-    private static final Logger log = LoggerFactory.getLogger(LinuxCmdUtil.class);
+public class UxCmdUtils {
+    private static final Logger log = LoggerFactory.getLogger(UxCmdUtils.class);
 
     /**
      * Execute a Unix command with up to 6 options/parameters
      * @param cmd The Unix command
      * @param param The options and parameters
      */
-    public static void execCmd(String cmd, String... param /*, Optional<String> option1, Optional<String> option2*/ ) {
+    public static synchronized void execCmd(String cmd, String... param /*, Optional<String> option1, Optional<String> option2*/ ) {
         Process p;
         String p1 = param.length > 0 ? param[0] : "";
         String p2 = param.length > 1 ? param[1] : "";

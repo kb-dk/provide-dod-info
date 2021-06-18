@@ -47,6 +47,7 @@ public class ConfigurationTest extends ExtendedTestCase {
 
         Assert.assertTrue(conf.getCorpusOrigDir().isDirectory());
         Assert.assertNotNull(conf.getAlmaSruSearch());
+        Assert.assertNotNull(conf.getCutYear());
 
 
     }

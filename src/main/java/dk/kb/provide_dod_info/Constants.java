@@ -27,8 +27,31 @@ public class Constants {
     public static final String XPATH_FIND_IDENTIFIER_TYPE = "/*[local-name()='Book']/*[local-name()='IdentifierType']/text()";
 
     /** The XPATH for extracting the dateIssued from the generated alma mods.xml */
-    public static final String XPATH_FIND_YEAR = "/*[local-name()='mods']/*[local-name()='originInfo']/*[local-name()='dateIssued']/text()";
-    /** The XPATH for extracting the Author from the generated alma mods.xml*/
-    public static final String XPATH_FIND_AUTHOR = "/*[local-name()='mods']/*[local-name()='IdentifierType']/text()";
+    public static final String XP_MODS_FIND_YEAR = "/*[local-name()='mods']/*[local-name()='originInfo']/*[local-name()='dateIssued']/text()";
+    // ovenstående kan forkortes til "/mods/originInfo/dateIssued/text()"
 
+    public static final String XP_MARC_FIND_YEAR = "recordData/record/controlfield[@tag='008']/text()"; //
+
+
+
+
+    /** The XPATH for extracting the Author from the generated alma mods.xml*/
+    public static final String XP_MODS_FIND_AUTHOR = "/*[local-name()='mods']/*[local-name()='name']/*[local-name()='namePart']/text()";
+    // "/mods/name[@type='personal']/namePart/text()";
+
+    public static final String XP_MARC_FIND_AUTHOR = "recordData/record/datafield[@tag='100']/subfield[@code='a']/text()";
+
+    public static final String XP_MARC_FIND_TITLE = "recordData/record/datafield[@tag='245']/subfield[@code='a']/text()";
+
+    public static final String XP_MARC_FIND_PUBPLACE = "recordData/record/datafield[@tag='260']/subfield[@code='a']/text()";
+
+    public static final String XP_MARC_FIND_PUBLISHER = "recordData/record/datafield[@tag='260']/subfield[@code='b']/text()";
+
+    public static final String XP_MARC_FIND_CLASSIFICATION = "recordData/record/datafield[@tag='084']/subfield[@code='o']/text()";
+
+    public static String releaseYear;
+
+    public enum ExtractInfo {
+        YEAR, AUTHOR, TITLE, PUBPLACE, PUBLISHER, CLASSIFICATION
+    }
 }
