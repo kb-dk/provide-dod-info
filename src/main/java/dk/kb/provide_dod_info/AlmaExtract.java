@@ -2,19 +2,20 @@ package dk.kb.provide_dod_info;
 
 import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.metadata.AlmaMetadataRetriever;
+import dk.kb.provide_dod_info.utils.ExcelUtils;
+import dk.kb.provide_dod_info.utils.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Extracts the MODS metadata from alma.
  *
  * Usage:
- * dk.kb.provide-dod-info.AlmaExtract /PATH/TO/provide-dod-info.yml [ISBN]+
+ * dk.kb.provide-dod-info.AlmaExtract /PATH/TO/provide-dod-info.yml
  *
  */
 public class AlmaExtract {
@@ -30,8 +31,7 @@ public class AlmaExtract {
      */
     public static void main(String[] args) {
         if(args.length < 1) {
-            System.err.println("Needs at least one argument: ");
-            System.err.println(" * The configuration file.");
+            System.err.println("Needs the configuration file 'provide-dod-info.yml' as argument.");
             System.exit(-1);
         }
 
@@ -45,37 +45,23 @@ public class AlmaExtract {
 
             AlmaMetadataRetriever almaMetadataRetriever = new AlmaMetadataRetriever(conf, httpClient);
             AlmaRetriever almaRetriever = new AlmaRetriever(conf, almaMetadataRetriever);
-//            almaRetriever.retrieveAlmaMetadataForBooks(workbook);
             almaRetriever.retrieveAlmaMetadataForFiles(workbook);
-            try {
-                FileOutputStream out = new FileOutputStream(conf.getOutDir()+"/AlmaExtractResult.xlsx");
-                workbook.write(out);
-                out.close();
-                System.out.println("AlmaExtractResult.xlsx written successfully on disk.");
+
+//            ExcelUtils.createExcel(workbook, conf);
+            DataHandler dataHandler = new DataHandler(conf);
+            String excelFile = conf.getOutDir() + "/AlmaExtractResult.xlsx";
+            File existingFile = FileUtils.getExistingFile(excelFile);
+            String absolutePath = existingFile.getAbsolutePath();
+            Map<String, String> values;
+            if (StringUtils.isNotEmpty(absolutePath)) {
+                values = ExcelUtils.getValues(absolutePath);
+                dataHandler.sortDirectories(values);
             }
-            catch (Exception e) {
-                log.error("Failed to write Excel-file.");
-                e.printStackTrace();
-            }
+
+
 
         } catch (Exception e ) {
-            throw new IllegalStateException("Failure to retrieve alma metadata in MODS.", e);
+            throw new IllegalStateException("Something went wrong.", e);
         }
     }
-
-    /**
-     * Retrieves the different kinds of metadata for given ISBN number.
-     * @param almaMetadataRetriever The Alma metadata retriever.
-     * @param isbn The ISBN number of the record to retrieve the metadata for.
-     */
-//    protected static void retrieveMetadataForIsbn(AlmaMetadataRetriever almaMetadataRetriever,
-//                                                  String isbn) throws IOException {
-//        log.info("Retrieving the metadata for ISBN: '" + isbn + "'");
-//        File modsMetadataFile = new File(outputDir, isbn + ".mods.xml");
-//        try (OutputStream out = new FileOutputStream(modsMetadataFile)) {
-//            almaMetadataRetriever.retrieveMetadataForISBN(isbn, out);
-//            //Saved to modsMetadataFile
-//        }
-//        log.info("Metadata for ISBN '" + isbn + "' can be found at: " + modsMetadataFile.getAbsolutePath());
-//    }
 }

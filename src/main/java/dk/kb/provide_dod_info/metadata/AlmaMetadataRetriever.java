@@ -101,7 +101,7 @@ public class AlmaMetadataRetriever {
         ArgumentCheck.checkNotNull(out, "OutputStream out");
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        retrieveAlmaMetadataBarcode(barcode, byteArrayOutputStream); //MARC/MODS
+        retrieveAlmaMetadataBarcode(barcode, byteArrayOutputStream); //MARC
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 

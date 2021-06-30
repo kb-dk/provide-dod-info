@@ -38,20 +38,24 @@ public class Constants {
     /** The XPATH for extracting the Author from the generated alma mods.xml*/
     public static final String XP_MODS_FIND_AUTHOR = "/*[local-name()='mods']/*[local-name()='name']/*[local-name()='namePart']/text()";
     // "/mods/name[@type='personal']/namePart/text()";
-
+    /** The XPATH for extracting the Author from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_AUTHOR = "recordData/record/datafield[@tag='100']/subfield[@code='a']/text()";
-
+    /** The XPATH for extracting the Title from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_TITLE = "recordData/record/datafield[@tag='245']/subfield[@code='a']/text()";
-
+    /** The XPATH for extracting the Place of publication from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_PUBPLACE = "recordData/record/datafield[@tag='260']/subfield[@code='a']/text()";
-
+    /** The XPATH for extracting the Publisher from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_PUBLISHER = "recordData/record/datafield[@tag='260']/subfield[@code='b']/text()";
-
+    /** The XPATH for extracting the Classification from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_CLASSIFICATION = "recordData/record/datafield[@tag='084']/subfield[@code='o']/text()";
 
-    public static String releaseYear;
+    public static String OK = "OK";
+    public static String NOK = "NOK";
+    public static String SHEETNAME = "Alma results";
 
     public enum ExtractInfo {
         YEAR, AUTHOR, TITLE, PUBPLACE, PUBLISHER, CLASSIFICATION
     }
+
+
 }

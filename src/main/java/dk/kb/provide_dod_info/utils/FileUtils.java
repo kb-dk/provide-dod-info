@@ -1,6 +1,8 @@
 package dk.kb.provide_dod_info.utils;
 
 import dk.kb.provide_dod_info.exception.ArgumentCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.Collection;
  * Utility class for dealing with files.
  */
 public class FileUtils {
+    private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
     /**
      * Create or reuse directory
@@ -139,10 +142,15 @@ public class FileUtils {
      * Moves one file to another destination.
      * @param orig The original file to move.
      * @param dest The destination for file.
-     * @throws IOException If it  to move the file.
+     * @throws IOException If it fails to move the file.
      */
     public static void moveFile(File orig, File dest) throws IOException {
-        ArgumentCheck.checkExistsNormalFile(orig, "File orig");
+        try {
+            ArgumentCheck.checkExistsNormalFile(orig, "File orig");
+        } catch (ArgumentCheck e) {
+            log.error("Something wrong with the file: {}", orig);
+//            e.printStackTrace();
+        }
         Files.move(orig.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.ATOMIC_MOVE);
     }

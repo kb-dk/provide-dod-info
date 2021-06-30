@@ -1,7 +1,10 @@
 package dk.kb.provide_dod_info.utils;
 
+import dk.kb.provide_dod_info.Constants;
+import dk.kb.provide_dod_info.config.Configuration;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -10,43 +13,58 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class ExcelUtils {
+    private static final Logger log = LoggerFactory.getLogger(ExcelUtils.class);
     /**
      * Add the collected data to the excel sheet
+     *
      * @param sheet The sheet
-     * @param data The data
+     * @param data  The data
      */
     public static void populateSheet(XSSFSheet sheet, Map<String, Object[]> data) {
         Set<String> keyset = data.keySet();
         int rowNumber = 0;
-        for (String key : keyset)
-        {
+        for (String key : keyset) {
             XSSFRow row = sheet.createRow(rowNumber++);
-            Object [] objArr = data.get(key);
+            Object[] objArr = data.get(key);
             int cellNumber = 0;
-            for (Object obj : objArr)
-            {
+            for (Object obj : objArr) {
                 XSSFCell cell = row.createCell(cellNumber++);
-                if(obj instanceof String)
-                    cell.setCellValue((String)obj);
-                else if(obj instanceof Integer)
-                    cell.setCellValue((Integer)obj);
+                if (obj instanceof String) {
+                    cell.setCellValue((String) obj);
+                } else if (obj instanceof Integer) {
+                    cell.setCellValue((Integer) obj);
+                } else if (obj instanceof Double) {
+                    cell.setCellValue((Double) obj);
+                }
             }
-
         }
     }
 
-    public static void setWorkbookFormats(XSSFWorkbook workbook, XSSFSheet sheet) {
+    /**
+     * Set specific formats for the workbook e.g. headings, column width,
+     * @param workbook The workbook to set formats for
+     */
+    public static void setWorkbookFormats(XSSFWorkbook workbook) {
+        XSSFSheet sheet = workbook.getSheet(Constants.SHEETNAME);
         XSSFCellStyle defaultCellStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontName(XSSFFont.DEFAULT_FONT_NAME);
         defaultCellStyle.setFont(font);
         for (int i = 0; i < 8; i++) {
-
             sheet.setDefaultColumnStyle(i, defaultCellStyle);
         }
         for (int i = 0; i < 7; i++) {
@@ -57,10 +75,10 @@ public class ExcelUtils {
         XSSFFont fontErrorCells = workbook.createFont();
         fontErrorCells.setColor(IndexedColors.RED.getIndex());
         cellStyleErrorCells.setFont(fontErrorCells);
-        for (Row row : sheet){
+        for (Row row : sheet) {
             Cell descriptions = row.getCell(1);
             final String stringCellValue = descriptions.getStringCellValue();
-            if (stringCellValue.startsWith("No")){
+            if (stringCellValue.startsWith(Constants.NOK)) {
                 descriptions.setCellStyle(cellStyleErrorCells);
             }
         }
@@ -75,4 +93,80 @@ public class ExcelUtils {
 
     }
 
+    public static Map<String, String> getValues(String pathToExcel) {
+        DataFormatter formatter = new DataFormatter();
+        FileInputStream fis = null;
+        try {
+            File file = new File(String.valueOf(pathToExcel));
+            fis = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            log.error("The file '{}' was not found", pathToExcel);
+//            e.printStackTrace();
+        }
+        //creating Workbook instance that refers to .xlsx file
+        XSSFWorkbook wb = null;
+        try {
+            if (fis != null) {
+                wb = new XSSFWorkbook(fis);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        XSSFSheet sheet = null;
+        if (wb != null) {
+            sheet = wb.getSheetAt(0);
+        }
+
+        if (sheet != null) {
+            Map<String, String> data = new TreeMap<>();
+            int barcodeColumn = 0;
+            int yearColumn = 0;
+
+            // table header row; get column index for barcodes and years
+            Row row0 = sheet.getRow(0);
+            Iterator<Cell> headerIterator = row0.cellIterator();
+            Cell header;
+            if (row0.getRowNum() == 0) {
+                while (headerIterator.hasNext()) {
+                    header = headerIterator.next();
+                    if (header.getStringCellValue().equalsIgnoreCase("Barcode")) {
+                        barcodeColumn = header.getColumnIndex();
+                    }
+                    if (header.getStringCellValue().equalsIgnoreCase("Year")) {
+                        yearColumn = header.getColumnIndex();
+                    }
+                }
+            }
+
+            for  (Row row : sheet) {
+                // Add the data
+                if (row.getRowNum() > 0) {
+                    Cell barcodeCell = row.getCell(barcodeColumn);
+                    Cell yearCell = row.getCell(yearColumn);
+                    String barcode = barcodeCell.getStringCellValue(); //formatter.formatCellValue(barcodeCell);
+                    String year = yearCell.getStringCellValue(); // formatter.formatCellValue(yearCell);
+                    data.put(barcode, year);
+                }
+            }
+            return data;
+        }
+        throw new IllegalStateException("Sheet was not found");
+//        return null;
+    }
+
+    public static void createExcel(XSSFWorkbook workbook, Configuration conf) {
+        try {
+            FileOutputStream out = new FileOutputStream(conf.getOutDir()+"/AlmaExtractResult.xlsx");
+            workbook.write(out);
+            out.flush();
+            out.close();
+            log.info("AlmaExtractResult.xlsx written successfully on disk.");
+        }
+        catch (Exception e) {
+            log.error("Failed to write Excel-file.");
+            e.printStackTrace();
+        }
+    }
+
 }
+
