@@ -25,7 +25,8 @@ public class UxCmdUtils {
 
         @Override
         public void run() {
-            new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
+            new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                    .lines()
                     .forEach(consumer);
         }
     }
