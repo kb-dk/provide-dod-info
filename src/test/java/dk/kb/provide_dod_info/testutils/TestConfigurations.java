@@ -17,20 +17,12 @@ public class TestConfigurations {
     public static Configuration getConfigurationForTest(){
         try {
             File baseDir = TestFileUtils.createEmptyDirectory(TestFileUtils.getTempDir().getAbsolutePath());
-            File baseBookMetadataDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/books_metadata");
-            File baseBookFileDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/books_files");
-            File baseAudioMetadataDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/audio_metadata");
-            File baseAudioFileDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/audio_files");
             File outDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/out");
 
             Map<String, Object> confMap = new HashMap<>();
-            confMap.put(Configuration.CONF_EBOOK_OUTPUT_DIR, baseBookMetadataDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_OUTPUT_DIR, baseAudioMetadataDir.getAbsolutePath());
-            confMap.put(Configuration.CONF_CORPUS_FILE_DIR, baseBookFileDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_FILE_DIR, baseAudioFileDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_FORMATS, Arrays.asList("mp3"));
             confMap.put(Configuration.CONF_EBOOK_FORMATS, Arrays.asList("pdf"));
             confMap.put(Configuration.CONF_OUT_DIR, outDir.getAbsolutePath());
+
             confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
 
 
@@ -41,23 +33,17 @@ public class TestConfigurations {
     }
 
 
-    public static Configuration getConfigurationForTestWithoutTransfer(){
+    public static Configuration getTestConfiguration(){
         try {
             File baseDir = TestFileUtils.createEmptyDirectory(TestFileUtils.getTempDir().getAbsolutePath());
-            File baseBookMetadataDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/books_metadata");
-            File baseBookFileDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/books_files");
-            File baseAudioMetadataDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/audio_metadata");
-            File baseAudioFileDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/audio_files");
+            File corpusOrigDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/testfiler");
             File outDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/out");
 
             Map<String, Object> confMap = new HashMap<>();
-            confMap.put(Configuration.CONF_EBOOK_OUTPUT_DIR, baseBookMetadataDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_OUTPUT_DIR, baseAudioMetadataDir.getAbsolutePath());
-            confMap.put(Configuration.CONF_CORPUS_FILE_DIR, baseBookFileDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_FILE_DIR, baseAudioFileDir.getAbsolutePath());
-//            confMap.put(Configuration.CONF_AUDIO_FORMATS, Arrays.asList("mp3"));
-            confMap.put(Configuration.CONF_EBOOK_FORMATS, Arrays.asList("pdf"));
+            confMap.put(Configuration.CONF_CORPUS_FILE_DIR, corpusOrigDir.getAbsolutePath());
             confMap.put(Configuration.CONF_OUT_DIR, outDir.getAbsolutePath());
+            confMap.put(Configuration.CONF_CUT_YEAR, 1881);
+            confMap.put(Configuration.CONF_OUT_FILE_NAME, "/AlmaExtractResult.xlsx");
             confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
 
             return new Configuration(confMap);

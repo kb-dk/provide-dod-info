@@ -27,12 +27,20 @@ public class DataHandler {
 
     public void sortDirectories(Map<String, String> data) {
 
-        String regEx = "^(15)[0-9][0-9]$";
-        String subDir = "/1500to1599";
+        String regEx = "^(15)[0-4][0-9]$";
+        String subDir = "/1500to1549";
         moveToSubDirs(data, regEx, subDir);
 
-        regEx = "^(16)[0-9][0-9]$";
-        subDir = "/1600to1699";
+        regEx = "^(15)[5-9][0-9]$";
+        subDir = "/1550to1599";
+        moveToSubDirs(data, regEx, subDir);
+
+        regEx = "^(16)[0-4][0-9]$";
+        subDir = "/1600to1649";
+        moveToSubDirs(data, regEx, subDir);
+
+        regEx = "^(16)[5-9][0-9]$";
+        subDir = "/1650to1699";
         moveToSubDirs(data, regEx, subDir);
 
         regEx = "^(17)[0-4][0-9]$";
@@ -80,12 +88,13 @@ public class DataHandler {
                 FileUtils.moveFile(fileToMoveTxt, moveToTxt);
             } catch (Exception e){
                 log.error("The file '{}' could not be moved", fileToMoveTxt);
+                log.debug(e.toString());
             }
             try {
                 FileUtils.moveFile(fileToMoveXml, moveToXml);
             } catch (Exception e) {
                 log.error("The file '{}' could not be moved", fileToMoveXml);
-//                e.printStackTrace();
+                log.debug(e.toString());
             }
         }
     }

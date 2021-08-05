@@ -4,12 +4,15 @@ import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.metadata.AlmaMetadataRetriever;
 import dk.kb.provide_dod_info.utils.ExcelUtils;
 import dk.kb.provide_dod_info.utils.FileUtils;
+import dk.kb.provide_dod_info.utils.ZipUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Extracts the MODS metadata from alma.
@@ -47,9 +50,8 @@ public class AlmaExtract {
             AlmaRetriever almaRetriever = new AlmaRetriever(conf, almaMetadataRetriever);
             almaRetriever.retrieveAlmaMetadataForFiles(workbook);
 
-//            ExcelUtils.createExcel(workbook, conf);
             DataHandler dataHandler = new DataHandler(conf);
-            String excelFile = conf.getOutDir() + "/AlmaExtractResult.xlsx";
+            String excelFile = conf.getOutDir() + "/" + conf.getOutFileName();
             File existingFile = FileUtils.getExistingFile(excelFile);
             String absolutePath = existingFile.getAbsolutePath();
             Map<String, String> values;
@@ -58,10 +60,17 @@ public class AlmaExtract {
                 dataHandler.sortDirectories(values);
             }
 
+            String sourceFile = conf.getOutDir().getAbsolutePath();
+            FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + "/out.zip");
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            File fileToZip = new File(sourceFile);
 
+            ZipUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.close();
+            fos.close();
 
         } catch (Exception e ) {
-            throw new IllegalStateException("Something went wrong.", e);
+            throw new IllegalStateException("Something went wrong. Check log for errors", e);
         }
     }
 }

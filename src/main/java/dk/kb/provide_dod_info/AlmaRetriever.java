@@ -249,7 +249,7 @@ public class AlmaRetriever {
         } else {
             List<String> fileNames = Arrays.stream(files)
                     .map(File::getName)
-                    .filter(name -> name.matches("^(?!.*(-color|_color|_bw)).*$")) // remove unwanted files
+                    .filter(name -> name.matches("^(?!.*(-color|_color|_bw|xml)).*$")) // remove unwanted files
                     .collect(Collectors.toList());
 
             for(String fileName : fileNames) {

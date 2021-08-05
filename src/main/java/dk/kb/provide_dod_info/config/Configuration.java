@@ -52,39 +52,39 @@ public class Configuration {
     /** The logger.*/
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
-    /** The configuration root element for provide-dod-info.*/
-    public static final String CONF_ALMA_META_EXTRACT = "provide-dod-info";
     /** The configuration name for the output directory.*/
     public static final String CONF_EBOOK_OUTPUT_DIR = "ebook_output_dir";
-    /** The configuration name for the output directory.*/
-//    public static final String CONF_AUDIO_OUTPUT_DIR = "audio_output_dir";
-    /** The configuration name for the ebook file directory.*/
-    public static final String CONF_CORPUS_FILE_DIR = "corpus_orig_dir"; //CONF_EBOOK_FILE_DIR
-    /** The configuration name for the audio book file directory.*/
-//    public static final String CONF_AUDIO_FILE_DIR = "audio_orig_dir";
+
+    /** The configuration root element for provide-dod-info.*/
+    public static final String CONF_PROVIDE_DOD_INFO = "provide-dod-info";
+    /** The configuration name for the input directory.*/
+    public static final String CONF_CORPUS_FILE_DIR = "corpus_orig_dir";
     /** The configuration name for the list of formats for the ebooks.*/
     public static final String CONF_EBOOK_FORMATS = "ebook_formats";
-    /** The configuration name for the list of formats for the audio books.*/
-//    public static final String CONF_AUDIO_FORMATS = "audio_formats";
-    /** The directory where the output statistics will be placed.*/
+    /** The configuration name for the output directory. */
     public static final String CONF_OUT_DIR = "out_dir";
+    /** The configuration name for Alma records with publish date older than this will be handled */
     public static final String CONF_CUT_YEAR = "cut_year";
-
     /** The configuration Alma sru search base url.*/
     public static final String CONF_ALMA_SRU_SEARCH = "alma_sru_search";
+    /** The configuration name for the output file */
+    public static final String CONF_OUT_FILE_NAME = "out_file_name";
 
-    /** The output directory for the ebooks.*/
-    protected final File ebookOutputDir;
-
+    /** The directory containing the pdf files for which to extract Alma data */
     protected final File corpusOrigDir;
-    /** The output directory for the audio-books.*/
-//    protected final File abookOutputDir;
-    /** The directory for the output  files.*/
+    /** The directory for the output files.*/
     protected final File outDir;
+    /** Only Alma records with publish date older than this will be handled */
     protected final Integer cutYear;
-
     /** The configuration for the alma sru search.*/
     protected final String almaSruSearchConfiguration;
+    /** The name of the Excel file containing the data extracted from Alma */
+    protected final String outFileName;
+
+    /** The output directory for the ebooks.*/
+//    protected final File ebookOutputDir;
+
+
 
     /**
      * Constructor.
@@ -93,23 +93,20 @@ public class Configuration {
      */
     public Configuration(Map<String, Object> confMap) throws IOException {
         ArgumentCheck.checkNotNullOrEmpty(confMap, "Map<String, Object> confMap");
-
-        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_EBOOK_OUTPUT_DIR, "confMap");
-//        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_AUDIO_OUTPUT_DIR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_OUT_DIR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_ALMA_SRU_SEARCH, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CORPUS_FILE_DIR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CUT_YEAR, "confMap");
+        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_OUT_FILE_NAME, "confMap");
 
-        ebookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_EBOOK_OUTPUT_DIR));
-//        abookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_AUDIO_OUTPUT_DIR));
+//        ebookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_EBOOK_OUTPUT_DIR));
+//        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_EBOOK_OUTPUT_DIR, "confMap");
 
         this.outDir = FileUtils.createDirectory((String) confMap.get(CONF_OUT_DIR));
-
         this.corpusOrigDir = FileUtils.createDirectory ((String) confMap.get(CONF_CORPUS_FILE_DIR));
-
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
         this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
+        this.outFileName = (String) confMap.get(CONF_OUT_FILE_NAME);
 
     }
 
@@ -117,16 +114,6 @@ public class Configuration {
     public String getAlmaSruSearch() {
         return almaSruSearchConfiguration;
     }
-
-    /** @return The output directory for the ebook directories. */
-//    public File getEbookOutputDir() {
-//        return ebookOutputDir;
-//    }
-
-    /** @return The output directory for the audio book directories. */
-//    public File getAudioOutputDir() {
-//        return abookOutputDir;
-//    }
 
     public File getCorpusOrigDir() {
         return corpusOrigDir;
@@ -138,6 +125,10 @@ public class Configuration {
 
     public Integer getCutYear() {
         return cutYear;
+    }
+
+    public String getOutFileName() {
+        return outFileName;
     }
     /**
      * Creates a configuration from a file.
@@ -151,7 +142,7 @@ public class Configuration {
 
         log.debug("Loading configuration from file '" + yamlFile.getAbsolutePath() + "'");
         LinkedHashMap<String, LinkedHashMap> map = YamlUtils.loadYamlSettings(yamlFile);
-        Map<String, Object> confMap = (Map<String, Object>) map.get(CONF_ALMA_META_EXTRACT);
+        Map<String, Object> confMap = (Map<String, Object>) map.get(CONF_PROVIDE_DOD_INFO);
         return new Configuration(confMap);
     }
 }

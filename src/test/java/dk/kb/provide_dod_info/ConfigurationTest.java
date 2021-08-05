@@ -27,34 +27,29 @@ public class ConfigurationTest extends ExtendedTestCase {
 
     @Test
     public void testLoadingFromFile() throws IOException {
-        FileUtils.createDirectory("tempDir/transfer/ebook/ingest");
-        FileUtils.createDirectory("tempDir/transfer/ebook/content");
-        FileUtils.createDirectory("tempDir/transfer/ebook/metadata");
-        FileUtils.createDirectory("tempDir/transfer/audio/ingest");
-        FileUtils.createDirectory("tempDir/transfer/audio/content");
-        FileUtils.createDirectory("tempDir/transfer/audio/metadata");
+        FileUtils.createDirectory("tempDir/testfiler");
+        FileUtils.createDirectory("tempDir/out");
 
         Configuration conf = Configuration.createFromYAMLFile(new File("src/test/resources/provide-dod-info.yml"));
         Assert.assertNotNull(conf);
-//        Assert.assertNotNull(conf.getAudioOutputDir());
-//        Assert.assertNotNull(conf.getEbookOutputDir());
-        Assert.assertNotNull(conf.getCorpusOrigDir());
-        Assert.assertNotNull(conf.getOutDir());
 
-//        Assert.assertTrue(conf.getAudioOutputDir().isDirectory());
-//        Assert.assertTrue(conf.getEbookOutputDir().isDirectory());
+        Assert.assertNotNull(conf.getCorpusOrigDir());
+        Assert.assertTrue(conf.getCorpusOrigDir().isDirectory());
+
+        Assert.assertNotNull(conf.getOutDir());
         Assert.assertTrue(conf.getOutDir().isDirectory());
 
-        Assert.assertTrue(conf.getCorpusOrigDir().isDirectory());
+
         Assert.assertNotNull(conf.getAlmaSruSearch());
         Assert.assertNotNull(conf.getCutYear());
+        Assert.assertNotNull(conf.getOutFileName());
 
 
     }
 
     @Test
     public void testConfigurationWithoutTransfer() {
-        Configuration conf = TestConfigurations.getConfigurationForTestWithoutTransfer();
+        Configuration conf = TestConfigurations.getTestConfiguration();
 //        Assert.assertNull(conf.getTransferConfiguration());
     }
 }

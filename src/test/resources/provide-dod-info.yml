@@ -1,18 +1,8 @@
 provide-dod-info:
-#  ebook_output_dir: tempDir/packaged_books
-  ebook_output_dir: /home/dahe/Documents/EbookTest/BooksTest/Ebooks/Packaged_books
-#  audio_output_dir: tempDir/packaged_audio
-  audio_output_dir: /home/dahe/Documents/EbookTest/BooksTest/Audiobooks/Packaged_books
-#  ebook_orig_dir: tempDir/downloaded_book_files
-#  audio_orig_dir: tempDir/downloaded_audio_files
-  corpus_orig_dir: /home/dahe/Documents/DKM-048/dkm-048-testfiler
-  out_dir: /home/dahe//Documents/EbookTest/
+  corpus_orig_dir: tempDir/testfiler
+  out_dir: tempDir/out
   cut_year: 1881
-#  ebook_formats:
-#    - pdf
-#    - epub
-#  audio_formats:
-#    - mp3
+  out_file_name: AlmaExtractResult.xlsx
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
 
 

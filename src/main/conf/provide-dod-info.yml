@@ -1,13 +1,8 @@
 provide-dod-info:
-#  ebook_output_dir: $ tempDir/packaged_books, the directory where the e-book mods-files are placed
-  ebook_output_dir: /home/dahe/Documents/EbookTest/BooksTest/Ebooks/Packaged_books
-#  audio_output_dir: $ tempDir/packaged_audio, the directory where the audio book mods-files are placed
-  audio_output_dir: /home/dahe/Documents/EbookTest/BooksTest/Audiobooks/Packaged_books
-#  out_dir: $ the directory where the excel ouput-file will be placed
-  out_dir: /home/dahe//Documents/DKM-048/out
-#  corpus_orig_dir: $ the directory where the original corpus files are placed
-  corpus_orig_dir: /home/dahe/Documents/DKM-048/dkm-048-testfiler
-# alma_sru_search: $ the basic part of the Alma SRU search URI
-  alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
+  #  out_dir: $ the directory where the ouput-files (marc.xml, txt, xlsl) will be placed
+  #  corpus_orig_dir: $ the directory where the (original) corpus files are placed
+  # alma_sru_search: $ the basic part of the Alma SRU search URI
+  # cut_year: $ barcodes containing publish dates older than this value will be handled (140 years -> in 2021 value must be 1881)
+  # out_file_name: $ the excel file with data extracted from Alma
 
 
