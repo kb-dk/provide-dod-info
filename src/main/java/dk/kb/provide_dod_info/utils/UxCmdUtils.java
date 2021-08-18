@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+/** Class for executing a Unix command */
 public class UxCmdUtils {
     private static final Logger log = LoggerFactory.getLogger(UxCmdUtils.class);
 

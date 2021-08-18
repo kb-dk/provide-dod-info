@@ -35,14 +35,14 @@ import java.util.stream.Collectors;
 import static dk.kb.provide_dod_info.Constants.*;
 import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
 
-
-// todo: update description
 /**
  * The AlmaRetriever
- * It will iterate through all the books - both E-books and Audio books.
- * It will extract the ISBN number from the Publizon metadata file, then use this ISBN to retrieve the
- * MODS from Alma.
- * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file
+ * It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
+ * wanted pdf-files (ends with -bw.pdf).
+ * It will then use this barcode to retrieve the MARC data for the related record from Alma in a xml file.
+ * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file together with specific
+ * metadata from the MARC xml file above.
+ * A txt file is extracted from pdf-files with pdftotext
  */
 public class AlmaRetriever {
     /** The logger.*/
@@ -59,7 +59,7 @@ public class AlmaRetriever {
     protected final XPathFactory xPathfactory;
     /** The row used in the excel-sheet*/
     private int row;
-    /** The value containing the 140 years cut for stuff without ... rights*/
+    /** The value containing the 140 years cut for records without Copyrights*/
     private final int cutYear;
 
     private String releaseYear;
@@ -236,7 +236,7 @@ public class AlmaRetriever {
 
     /**
      * Traverses the files in the base directory to retrieve the Alma metadata.
-     * Generate
+     * Generate txt-files from the pdf-files
      * @param dir The base directory for the pdf-files.
      */
     private void traverseFilesInFolder(File dir, Map<String, Object[]> data) {
@@ -258,24 +258,24 @@ public class AlmaRetriever {
             for(String fileName : fileNames) {
                 String barcode = getBarcode(fileName);
                 if (StringUtils.isNotEmpty(barcode)){
-                    retrieveMetadataForBarcode(dir, barcode, data);
-                    if (isNumeric(releaseYear)) {
-                        if (Integer.parseInt(releaseYear) < cutYear) {
-                            log.debug("Create text file for pdf-file: {}", fileName);
-                            try {
-                                UxCmdUtils.execCmd("pdftotext "                                        // command
-                                        + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
-                                        + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
-                            } catch (Exception e) {
-                                log.error("Could not make text file from pdf for: {}\n", fileName);
-//                                log.error("Stack: ");
-//                                e.printStackTrace();
-                            }
-                        }
-                    } else {
-                        log.error("Value of 'Year' is invalid: {}", releaseYear);
-
-                    }
+                    retrieveMetadataForBarcode(dir, barcode, data, fileName);
+//                    if (isNumeric(releaseYear)) {
+//                        if (Integer.parseInt(releaseYear) < cutYear) {
+//                            log.debug("Create text file for pdf-file: {}", fileName);
+//                            try {
+//                                UxCmdUtils.execCmd("pdftotext "                                        // command
+//                                        + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
+//                                        + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
+//                            } catch (Exception e) {
+//                                log.error("Could not make text file from pdf for: {}\n", fileName);
+////                                log.error("Stack: ");
+////                                e.printStackTrace();
+//                            }
+//                        }
+//                    } else {
+//                        log.error("Value of 'Year' is invalid: {}", releaseYear);
+//
+//                    }
                 }
             }
         }
@@ -287,10 +287,10 @@ public class AlmaRetriever {
      *  and puts the xml file in outDir from Yaml configuration file.
      * @param dir The directory, where the metadata-file will be placed.
      */
-    protected void retrieveMetadataForBarcode(File dir, String barcode, Map<String, Object[]> data) {
+    protected void retrieveMetadataForBarcode(File dir, String barcode, Map<String, Object[]> data, String  fileName) {
         try {
             File metadataFile = new File(conf.getTempDir(), barcode + Constants.MARC_METADATA_SUFFIX);
-            getAlmaMetadataForBarcode(barcode, metadataFile, data);
+            getAlmaMetadataForBarcode(barcode, metadataFile, data, fileName);
         } catch (Exception e) {
             log.info("Failure while trying to retrieve the Alma metadata for the directory '"
                 + dir.getAbsolutePath() + "'", e);
@@ -306,7 +306,7 @@ public class AlmaRetriever {
      * @throws IOException If it somehow fails to retrieve or write the output file.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void getAlmaMetadataForBarcode(String barcode, File xmlFile, Map<String, Object[]> data) throws IOException {
+    protected void getAlmaMetadataForBarcode(String barcode, File xmlFile, Map<String, Object[]> data, String fileName) throws IOException {
         try (OutputStream out = new FileOutputStream(xmlFile)) {
 
             // Create BARCODE.marc.xml-file and put retrieved metadata in it
@@ -322,8 +322,15 @@ public class AlmaRetriever {
                     String pubPlace = getDataFromXml(xmlFile, PUBPLACE);
                     String publisher = getDataFromXml(xmlFile, PUBLISHER);
                     String classification = getDataFromXml(xmlFile, CLASSIFICATION);
-                    // todo: add 653 data
-                    // todo: add link to original pdf file
+                    try {
+                        UxCmdUtils.execCmd("pdftotext "                                        // command
+                                + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
+                                + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
+                    } catch (Exception e) {
+                        log.error("Could not make text file from pdf for: {}\n", fileName);
+//                                log.error("Stack: ");
+//                                e.printStackTrace();
+                    }
                     if (FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
                         data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
                                 classification, title});

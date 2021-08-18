@@ -17,7 +17,10 @@ import java.util.zip.ZipOutputStream;
 
 
 /**
- * Extracts the MODS metadata from alma.
+ * Extracts MARC metadata from alma.
+ * Add specific extracted metadata to Excel file
+ * Sort output data in directories
+ * Zip data to out.zip
  *
  * Usage:
  * dk.kb.provide-dod-info.AlmaExtract /PATH/TO/provide-dod-info.yml

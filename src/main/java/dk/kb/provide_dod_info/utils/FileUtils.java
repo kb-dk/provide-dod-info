@@ -191,6 +191,10 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Delete a directory including the files in it
+     * @param directoryToBeDeleted the dir
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();

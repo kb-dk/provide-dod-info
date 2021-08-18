@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Class used to sort the output data in directories with 50 years intervals from 1400 to 1899
+ */
 public class DataHandler {
     /** The logger.*/
     private static final Logger log = LoggerFactory.getLogger(DataHandler.class);
@@ -27,8 +30,16 @@ public class DataHandler {
 
     public void sortDirectories(Map<String, String> data) {
 
-        String regEx = "^(15)[0-4][0-9]$";
-        String subDir = "/1500to1549";
+        String regEx = "^(14)[0-4][0-9]$";
+        String subDir = "/1400to1449";
+        moveToSubDirs(data, regEx, subDir);
+
+        regEx = "^(14)[5-9][0-9]$";
+        subDir = "/1450to1499";
+        moveToSubDirs(data, regEx, subDir);
+
+        regEx = "^(15)[0-4][0-9]$";
+        subDir = "/1500to1549";
         moveToSubDirs(data, regEx, subDir);
 
         regEx = "^(15)[5-9][0-9]$";

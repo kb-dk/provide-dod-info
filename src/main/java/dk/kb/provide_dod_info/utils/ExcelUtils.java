@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Utility class for handling Excel files
+ */
+
 public class ExcelUtils {
     private static final Logger log = LoggerFactory.getLogger(ExcelUtils.class);
     /**
@@ -93,6 +97,11 @@ public class ExcelUtils {
 
     }
 
+    /**
+     * Extract Barcode and Year values from Excel file
+     * @param pathToExcel Absolute path to Excel file
+     * @return map with barcode and year
+     */
     public static Map<String, String> getValues(String pathToExcel) {
         DataFormatter formatter = new DataFormatter();
         FileInputStream fis = null;

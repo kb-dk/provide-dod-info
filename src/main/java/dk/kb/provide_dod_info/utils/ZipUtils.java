@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/** Class for zipping directory */
 public class ZipUtils {
     private static final Logger log = LoggerFactory.getLogger(ZipUtils.class);
 
