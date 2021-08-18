@@ -74,6 +74,8 @@ public class Configuration {
     protected final File corpusOrigDir;
     /** The directory for the output files.*/
     protected final File outDir;
+
+    protected final File tmpDir;
     /** Only Alma records with publish date older than this will be handled */
     protected final Integer cutYear;
     /** The configuration for the alma sru search.*/
@@ -104,6 +106,7 @@ public class Configuration {
 
         this.outDir = FileUtils.createDirectory((String) confMap.get(CONF_OUT_DIR));
         this.corpusOrigDir = FileUtils.createDirectory ((String) confMap.get(CONF_CORPUS_FILE_DIR));
+        this.tmpDir = FileUtils.createDirectory("tempDir");
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
         this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
         this.outFileName = (String) confMap.get(CONF_OUT_FILE_NAME);
@@ -130,6 +133,11 @@ public class Configuration {
     public String getOutFileName() {
         return outFileName;
     }
+
+    public File getTempDir(){
+        return tmpDir;
+    }
+
     /**
      * Creates a configuration from a file.
      * @param yamlFile The YAML file with the configuration.

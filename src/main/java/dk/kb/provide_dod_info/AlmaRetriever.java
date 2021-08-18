@@ -115,7 +115,7 @@ public class AlmaRetriever {
             String res = "";
             switch (extractInfo) {
                 case YEAR:
-                    log.debug("Extracting Year");
+                    log.trace("Extracting Year");
                     XPathExpression issuedYearXpath = xpath.compile(XP_MARC_FIND_YEAR);
                     String  rYr = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
                     releaseYear = rYr.substring(7,11);
@@ -126,7 +126,7 @@ public class AlmaRetriever {
                     res = releaseYear;
                     break;
                 case AUTHOR:
-                    log.debug("Extracting Author");
+                    log.trace("Extracting Author");
                     XPathExpression authorXpath = xpath.compile(XP_MARC_FIND_AUTHOR);
                     String author = (String) authorXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(author)) {
@@ -134,28 +134,31 @@ public class AlmaRetriever {
                     } else {res = "N/A";}
                     break;
                 case TITLE:
-                    log.debug("Extracting Title");
+                    log.trace("Extracting Title");
                     XPathExpression titleXpath = xpath.compile(XP_MARC_FIND_TITLE);
-                    res = (String) titleXpath.evaluate(doc, XPathConstants.STRING);
+                    String title = (String) titleXpath.evaluate(doc, XPathConstants.STRING);
+                    if (StringUtils.isNotEmpty(title)){
+                        res = title.replaceAll("[\\[\\]:/]", "");
+                    } else { res = "N/A";}
                     break;
                 case PUBPLACE:
-                    log.debug("Extracting Place of Publication");
+                    log.trace("Extracting Place of Publication");
                     XPathExpression pubPlaceXpath = xpath.compile(XP_MARC_FIND_PUBPLACE);
                     String pubPlace = (String) pubPlaceXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(pubPlace)) {
-                        res = pubPlace;
+                        res = pubPlace.replaceAll("[\\[\\]:;,]", "");
                     } else { res = "N/A";}
                     break;
                 case PUBLISHER:
-                    log.debug("Extracting Publisher");
+                    log.trace("Extracting Publisher");
                     XPathExpression publisherXpath = xpath.compile(XP_MARC_FIND_PUBLISHER);
                     String publisher = (String) publisherXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(publisher)) {
-                        res = publisher;
+                        res = publisher.replaceAll("[ \\]\\[:,]", "");
                     } else { res = "N/A";}
                     break;
                 case CLASSIFICATION:
-                    log.debug("Extracting Classification");
+                    log.trace("Extracting Classification");
                     XPathExpression classificationXpath = xpath.compile(XP_MARC_FIND_CLASSIFICATION);
                     String classification = (String) classificationXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(classification)) {
@@ -163,7 +166,7 @@ public class AlmaRetriever {
                     } else { res = "N/A";}
                     break;
             }
-            log.debug("Returning data: {}", res);
+            log.trace("Returning data: {}", res);
             return res;
 
         }catch (IllegalStateException e){
@@ -262,7 +265,7 @@ public class AlmaRetriever {
                             try {
                                 UxCmdUtils.execCmd("pdftotext "                                        // command
                                         + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
-                                        + conf.getOutDir().getAbsolutePath() + "/" + barcode + ".txt");      // output file
+                                        + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
                             } catch (Exception e) {
                                 log.error("Could not make text file from pdf for: {}\n", fileName);
 //                                log.error("Stack: ");
@@ -270,7 +273,7 @@ public class AlmaRetriever {
                             }
                         }
                     } else {
-                        log.warn("Value of 'Year' is invalid: {}", releaseYear);
+                        log.error("Value of 'Year' is invalid: {}", releaseYear);
 
                     }
                 }
@@ -286,10 +289,10 @@ public class AlmaRetriever {
      */
     protected void retrieveMetadataForBarcode(File dir, String barcode, Map<String, Object[]> data) {
         try {
-            File metadataFile = new File(conf.getOutDir(), barcode + Constants.MARC_METADATA_SUFFIX);
+            File metadataFile = new File(conf.getTempDir(), barcode + Constants.MARC_METADATA_SUFFIX);
             getAlmaMetadataForBarcode(barcode, metadataFile, data);
         } catch (Exception e) {
-            log.info("Non-critical failure while trying to retrieve the Alma metadata for the directory '"
+            log.info("Failure while trying to retrieve the Alma metadata for the directory '"
                 + dir.getAbsolutePath() + "'", e);
         }
     }
@@ -321,8 +324,10 @@ public class AlmaRetriever {
                     String classification = getDataFromXml(xmlFile, CLASSIFICATION);
                     // todo: add 653 data
                     // todo: add link to original pdf file
-                    data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
-                            classification, title});
+                    if (FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
+                        data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
+                                classification, title});
+                    }
                 }
             }
             out.flush();
@@ -345,6 +350,11 @@ public class AlmaRetriever {
         }
     }
 
+    /**
+     * Check if passed String is a numeric value
+     * @param strNum string to check
+     * @return true if strNum is an integer representation (and not null), otherwise false
+     */
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
@@ -391,7 +401,7 @@ public class AlmaRetriever {
             }
             return isbn;
         } catch (Exception e) {
-            log.info("Non-critical failure while trying to retrieve the Alma metadata for the book directory '"
+            log.info("Failure while trying to retrieve the Alma metadata for the book directory '"
                 + dir.getAbsolutePath() + "'", e);
         }
         return null;

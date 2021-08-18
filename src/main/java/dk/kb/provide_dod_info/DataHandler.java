@@ -71,10 +71,10 @@ public class DataHandler {
 
         for (String barcode : barcodes) {
             String txtFile = barcode + ".txt";
-            File fileToMoveTxt = new File(conf.getOutDir() + "/" + txtFile);
+            File fileToMoveTxt = new File(conf.getTempDir() + "/" + txtFile);
             String xmlFile = barcode + ".marc.xml";
-            File fileToMoveXml = new File(conf.getOutDir() + "/" + xmlFile);
-            File moveToDir = new File(conf.getOutDir().getAbsolutePath() + subDir);
+            File fileToMoveXml = new File(conf.getTempDir() + "/"  + xmlFile);
+            File moveToDir = new File(conf.getTempDir().getAbsolutePath() + subDir);
 
             try {
                 FileUtils.createDirectory(moveToDir.toString());

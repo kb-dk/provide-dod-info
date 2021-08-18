@@ -22,7 +22,7 @@ public class FileUtils {
     /**
      * Create or reuse directory
      * @param dirPath Path to directory
-     * @return The direcory at the given path.
+     * @return The directory at the given path.
      * @throws IOException When creating a directory fail
      */
     public static File createDirectory(String dirPath) throws IOException {
@@ -60,6 +60,12 @@ public class FileUtils {
             throw new IllegalStateException("The path '" + filePath + "' must contain a file.");
         }
         return res;
+    }
+
+    public static Boolean checkFileExist(String filePath) {
+        ArgumentCheck.checkNotNullOrEmpty(filePath, "String filePath");
+        File res = new File(filePath);
+        return res.isFile();
     }
     /**
      * Delete method, which validates that the file is actually not present afterwards.
@@ -185,5 +191,14 @@ public class FileUtils {
         }
     }
 
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        directoryToBeDeleted.delete();
+    }
 }

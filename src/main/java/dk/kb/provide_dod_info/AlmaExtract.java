@@ -9,10 +9,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
+
 
 /**
  * Extracts the MODS metadata from alma.
@@ -51,7 +53,7 @@ public class AlmaExtract {
             almaRetriever.retrieveAlmaMetadataForFiles(workbook);
 
             DataHandler dataHandler = new DataHandler(conf);
-            String excelFile = conf.getOutDir() + "/" + conf.getOutFileName();
+            String excelFile = conf.getTempDir().getName() + "/"  + conf.getOutFileName();
             File existingFile = FileUtils.getExistingFile(excelFile);
             String absolutePath = existingFile.getAbsolutePath();
             Map<String, String> values;
@@ -60,7 +62,7 @@ public class AlmaExtract {
                 dataHandler.sortDirectories(values);
             }
 
-            String sourceFile = conf.getOutDir().getAbsolutePath();
+            String sourceFile = conf.getTempDir().getAbsolutePath();
             FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + "/out.zip");
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFile);
@@ -68,6 +70,8 @@ public class AlmaExtract {
             ZipUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
+            FileUtils.deleteDirectory( conf.getTempDir());
+            log.debug("Output ready");
 
         } catch (Exception e ) {
             throw new IllegalStateException("Something went wrong. Check log for errors", e);

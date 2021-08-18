@@ -156,11 +156,10 @@ public class ExcelUtils {
 
     public static void createExcel(XSSFWorkbook workbook, Configuration conf) {
         try {
-            FileOutputStream out = new FileOutputStream(conf.getOutDir() + "/" + conf.getOutFileName());
+            FileOutputStream out = new FileOutputStream(/*conf.getOutDir() + "/"*/conf.getTempDir() + "/" + conf.getOutFileName());
             workbook.write(out);
             out.flush();
             out.close();
-            log.info(conf.getOutFileName() + " written successfully on disk.");
         }
         catch (Exception e) {
             log.error("Failed to write Excel-file.");

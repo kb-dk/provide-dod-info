@@ -50,7 +50,7 @@ public class AlmaExtractTest extends ExtendedTestCase {
         addDescription("Test the case, when not enough argument are given.");
         try {
             PreventSystemExit.forbidSystemExitCall();
-            AlmaExtract.main(new String[]{"ARG1"});
+            AlmaExtract.main(new String[]{""});
         } finally {
             PreventSystemExit.enableSystemExitCall();
         }

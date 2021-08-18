@@ -29,12 +29,12 @@ import java.io.OutputStream;
 /**
  * Alma Metadata Retriever.
  *
- * Makes a direct ISBN search in Alma and extracts the MODS records.
+ * Makes a direct borcode search in Alma and extracts the MARC records.
  *
- * It should create MODS retrieval URLs like the following:
+ * It should create MARC retrieval URLs like the following:
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=mods&query=isbn=$ISBN
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=marcxml&query=alma.barcode=$BARCODE
- * Get all query options:
+ * To get all query options use:
  * http://bibsys-network.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK?version=1.2&operation=explain
  */
 public class AlmaMetadataRetriever {
