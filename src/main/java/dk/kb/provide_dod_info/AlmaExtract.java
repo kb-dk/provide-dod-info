@@ -2,6 +2,7 @@ package dk.kb.provide_dod_info;
 
 import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.metadata.AlmaMetadataRetriever;
+import dk.kb.provide_dod_info.utils.DateUtils;
 import dk.kb.provide_dod_info.utils.ExcelUtils;
 import dk.kb.provide_dod_info.utils.FileUtils;
 import dk.kb.provide_dod_info.utils.ZipUtils;
@@ -23,7 +24,7 @@ import java.util.zip.ZipOutputStream;
  * Zip data to out.zip
  *
  * Usage:
- * dk.kb.provide-dod-info.AlmaExtract /PATH/TO/provide-dod-info.yml
+ * dk.kb.provide-dod-info.AlmaExtract /PATH_TO/provide-dod-info.yml
  *
  */
 public class AlmaExtract {
@@ -46,7 +47,6 @@ public class AlmaExtract {
         String confPath = args[0];
         File confFile = new File(confPath);
         XSSFWorkbook workbook = new XSSFWorkbook();
-
         try {
             Configuration conf = Configuration.createFromYAMLFile(confFile);
             HttpClient httpClient = new HttpClient();
@@ -57,20 +57,26 @@ public class AlmaExtract {
 
             DataHandler dataHandler = new DataHandler(conf);
             String excelFile = conf.getTempDir().getName() + "/"  + conf.getOutFileName();
-            File existingFile = FileUtils.getExistingFile(excelFile);
-            String absolutePath = existingFile.getAbsolutePath();
+            File existingExcelFile = FileUtils.getExistingFile(excelFile);
+            String absolutePathExcelFile = existingExcelFile.getAbsolutePath();
+
+//                dataHandler.addReadMeIDE();
+            dataHandler.addReadMe();
+
             Map<String, String> values;
-            if (StringUtils.isNotEmpty(absolutePath)) {
-                values = ExcelUtils.getValues(absolutePath);
+            if (StringUtils.isNotEmpty(absolutePathExcelFile)) {
+                values = ExcelUtils.getValues(absolutePathExcelFile);
                 dataHandler.sortDirectories(values);
             }
 
-            String sourceFile = conf.getTempDir().getAbsolutePath();
-            FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + "/out.zip");
+            String yyyyMMdd = DateUtils.getDate();
+            String sourceDir = conf.getTempDir().getAbsolutePath();
+            String outZipFilename = "/DOD_OCR_korpus_" + yyyyMMdd + ".zip";
+            FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + outZipFilename);
             ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFile);
+            File dirToZip = new File(sourceDir);
 
-            ZipUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+            ZipUtils.zipFile(dirToZip, dirToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
             FileUtils.deleteDirectory( conf.getTempDir());

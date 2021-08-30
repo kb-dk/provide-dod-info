@@ -10,15 +10,17 @@ The output is zipped to the file out.zip.
 
 
 # Requirements
-pdftotext must be installed
-Access to 
+pdftotext must be installed,
+
+Access to the DOD pdf files (corpus_orig_dir in provide-dod-info.yml)
+
 Java 11, Maven 3
 
 A configuration file provide-dod-info.yml must be provided: 
 ```
 provide-dod-info:
-  out_file_name:: $ The name of the excel-file with data extracted from Alma (must have .xlsx extension) 
-  corpus_orig_dir:: $ The directory where the original pdf-files are placed
+  out_file_name: $ The name of the excel-file with data extracted from Alma (must have .xlsx extension) 
+  corpus_orig_dir: $ The directory where the original pdf-files are placed
   cut_year: $ Only files with Publish date older than this will be handled (140 years: e.g in 2021 it must be 1881)
   out_dir: $ The directory where the zipped ouput-files will be placed
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
@@ -30,12 +32,12 @@ Build:
 mvn clean package -DskipTests
 ```
 
-Extract the file provide-dod-info-*version*-distribution.tar.gz ('version' must be replaced by the correct version number e.g. 1.1)
-to wanted directory:
+Extract the file provide-dod-info-*version*-distribution.tar.gz (*version* must be replaced by the correct version number e.g. 1.1)
+to wanted directory e.g.:
 ```
-tar -xf target/provide-dod-info-version-distribution.tar.gz -C directory/
+tar -xf target/provide-dod-info-1.1-distribution.tar.gz -C directory/
 ```
-and then run:
+and then run with provide-dod-info.yml file placed as appropriate:
 ```
 directory/provide-dod-info-version/bin/provide-dod-info.sh path-to/provide-dod-info.yml
 ```

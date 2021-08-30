@@ -155,7 +155,7 @@ public class FileUtils {
             ArgumentCheck.checkExistsNormalFile(orig, "File orig");
         } catch (ArgumentCheck e) {
             log.error("Something wrong with the file: {}", orig);
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         Files.move(orig.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.ATOMIC_MOVE);

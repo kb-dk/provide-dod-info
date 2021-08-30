@@ -3,11 +3,13 @@ package dk.kb.provide_dod_info;
 import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.exception.ArgumentCheck;
 import dk.kb.provide_dod_info.utils.FileUtils;
+import dk.kb.provide_dod_info.utils.UxCmdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +20,46 @@ import java.util.stream.IntStream;
  * Class used to sort the output data in directories with 50 years intervals from 1400 to 1899
  */
 public class DataHandler {
-    /** The logger.*/
+    /**
+     * The logger.
+     */
     private static final Logger log = LoggerFactory.getLogger(DataHandler.class);
-    /** The configuration.*/
+    /**
+     * The configuration.
+     */
     protected final Configuration conf;
 
     public DataHandler(Configuration conf) {
         ArgumentCheck.checkNotNull(conf, "Configuration conf");
         this.conf = conf;
+    }
+
+    public void addReadMeIDE() {
+        try {
+            URL resource = DataHandler.class.getResource("/readme.txt");
+            if(resource !=null){
+                String readmePath = resource.getPath();
+                File fromReadme = new File(readmePath);
+                File toReadme = new File(conf.getTempDir().getAbsolutePath() + "/readme.txt");
+                FileUtils.moveFile(fromReadme, toReadme);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addReadMe() {
+        try {
+            UxCmdUtils.execCmd("jar xf " +                               // extract
+                    "provide-dod-info-1.0.0/lib/provide-dod-info-1.0.0.jar " + // fromFile
+                    "readme.txt " );                                           // toFile
+            UxCmdUtils.execCmd("chmod -x readme.txt");
+            File fromReadme = new File("readme.txt");
+            File toReadme = new File(conf.getTempDir().getAbsolutePath() + "/readme.txt");
+            FileUtils.moveFile(fromReadme, toReadme);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sortDirectories(Map<String, String> data) {

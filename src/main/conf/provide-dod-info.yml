@@ -1,8 +1,8 @@
 provide-dod-info:
-#  out_dir: $ the directory where the zipped output will be placed
-#  corpus_orig_dir: $ the directory where the (original) corpus files are placed
-#  alma_sru_search: $ the basic part of the Alma SRU search URI. Currently: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
-#  cut_year: $ Only barcodes containing publish dates older than this value will be handled (140 years -> in 2021 value must be 1881)
-#  out_file_name: $ the Excel file with data extracted from Alma, must have .xlsx ending
+  out_dir: $ the directory where the zipped output file will be placed
+  corpus_orig_dir: $ the directory where the (original) corpus files are placed
+  alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
+  cut_year: $ Only barcodes containing publish dates older than this value will be handled (140 years -> in 2021 value must be 1881)
+  out_file_name: $ the Excel file with data extracted from Alma, must have .xlsx ending e.g. AlmaExtractResult.xlsx
 
 

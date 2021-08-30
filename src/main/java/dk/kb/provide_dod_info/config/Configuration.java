@@ -75,6 +75,7 @@ public class Configuration {
     /** The directory for the output files.*/
     protected final File outDir;
 
+    /** Temporary directory where output files are placed before they are zipped. Deleted after zipping */
     protected final File tmpDir;
     /** Only Alma records with publish date older than this will be handled */
     protected final Integer cutYear;
@@ -82,10 +83,6 @@ public class Configuration {
     protected final String almaSruSearchConfiguration;
     /** The name of the Excel file containing the data extracted from Alma */
     protected final String outFileName;
-
-    /** The output directory for the ebooks.*/
-//    protected final File ebookOutputDir;
-
 
 
     /**
@@ -101,12 +98,9 @@ public class Configuration {
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_CUT_YEAR, "confMap");
         ArgumentCheck.checkThatMapContainsKey(confMap, CONF_OUT_FILE_NAME, "confMap");
 
-//        ebookOutputDir = FileUtils.createDirectory((String) confMap.get(CONF_EBOOK_OUTPUT_DIR));
-//        ArgumentCheck.checkThatMapContainsKey(confMap, CONF_EBOOK_OUTPUT_DIR, "confMap");
-
         this.outDir = FileUtils.createDirectory((String) confMap.get(CONF_OUT_DIR));
-        this.corpusOrigDir = FileUtils.createDirectory ((String) confMap.get(CONF_CORPUS_FILE_DIR));
-        this.tmpDir = FileUtils.createDirectory("tempDir");
+        this.corpusOrigDir = FileUtils.createDirectory((String) confMap.get(CONF_CORPUS_FILE_DIR));
+        this.tmpDir = FileUtils.createDirectory("outDir");
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
         this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
         this.outFileName = (String) confMap.get(CONF_OUT_FILE_NAME);
@@ -134,7 +128,7 @@ public class Configuration {
         return outFileName;
     }
 
-    public File getTempDir(){
+    public File getTempDir() {
         return tmpDir;
     }
 
