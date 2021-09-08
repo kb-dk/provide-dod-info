@@ -4,7 +4,6 @@ import dk.kb.provide_dod_info.Constants;
 import dk.kb.provide_dod_info.config.Configuration;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -33,7 +32,7 @@ import java.util.TreeMap;
 public class ExcelUtils {
     private static final Logger log = LoggerFactory.getLogger(ExcelUtils.class);
     /**
-     * Add the collected data to the excel sheet
+     * Add the collected data to the Excel sheet
      *
      * @param sheet The sheet
      * @param data  The data
@@ -102,8 +101,8 @@ public class ExcelUtils {
      * @param pathToExcel Absolute path to Excel file
      * @return map with barcode and year
      */
-    public static Map<String, String> getValues(String pathToExcel) {
-        DataFormatter formatter = new DataFormatter();
+    public static Map<String, String> getValues(String pathToExcel) throws IOException {
+//        DataFormatter formatter = new DataFormatter();
         FileInputStream fis = null;
         try {
             File file = new File(String.valueOf(pathToExcel));
@@ -118,54 +117,57 @@ public class ExcelUtils {
             if (fis != null) {
                 wb = new XSSFWorkbook(fis);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        XSSFSheet sheet = null;
-        if (wb != null) {
-            sheet = wb.getSheetAt(0);
-        }
+            XSSFSheet sheet = null;
+            if (wb != null) {
+                sheet = wb.getSheetAt(0);
+            }
+            if (sheet != null) {
+                Map<String, String> data = new TreeMap<>();
+                int barcodeColumn = 0;
+                int yearColumn = 0;
 
-        if (sheet != null) {
-            Map<String, String> data = new TreeMap<>();
-            int barcodeColumn = 0;
-            int yearColumn = 0;
-
-            // table header row; get column index for barcodes and years
-            Row row0 = sheet.getRow(0);
-            Iterator<Cell> headerIterator = row0.cellIterator();
-            Cell header;
-            if (row0.getRowNum() == 0) {
-                while (headerIterator.hasNext()) {
-                    header = headerIterator.next();
-                    if (header.getStringCellValue().equalsIgnoreCase("Barcode")) {
-                        barcodeColumn = header.getColumnIndex();
-                    }
-                    if (header.getStringCellValue().equalsIgnoreCase("Year")) {
-                        yearColumn = header.getColumnIndex();
+                // table header row; get column index for barcodes and years
+                Row row0 = sheet.getRow(0);
+                Iterator<Cell> headerIterator = row0.cellIterator();
+                Cell header;
+                if (row0.getRowNum() == 0) {
+                    while (headerIterator.hasNext()) {
+                        header = headerIterator.next();
+                        if ("Barcode".equalsIgnoreCase(header.getStringCellValue())) {
+                            barcodeColumn = header.getColumnIndex();
+                        }
+                        if ("Year".equalsIgnoreCase(header.getStringCellValue())) {
+                            yearColumn = header.getColumnIndex();
+                        }
                     }
                 }
-            }
-
-            for  (Row row : sheet) {
-                // Add the data
-                if (row.getRowNum() > 0) {
-                    Cell barcodeCell = row.getCell(barcodeColumn);
-                    Cell yearCell = row.getCell(yearColumn);
-                    String barcode = barcodeCell.getStringCellValue(); //formatter.formatCellValue(barcodeCell);
-                    String year = yearCell.getStringCellValue(); // formatter.formatCellValue(yearCell);
-                    data.put(barcode, year);
+                for  (Row row : sheet) {
+                    // Add the data
+                    if (row.getRowNum() > 0) {
+                        Cell barcodeCell = row.getCell(barcodeColumn);
+                        Cell yearCell = row.getCell(yearColumn);
+                        String barcode = barcodeCell.getStringCellValue(); //formatter.formatCellValue(barcodeCell);
+                        String year = yearCell.getStringCellValue(); // formatter.formatCellValue(yearCell);
+                        data.put(barcode, year);
+                    }
                 }
+                return data;
             }
-            return data;
         }
+        finally {
+            if (wb != null) {
+                fis.close();
+                wb.close();
+            }
+        }
+
         throw new IllegalStateException("Sheet was not found");
 //        return null;
     }
 
     public static void createExcel(XSSFWorkbook workbook, Configuration conf) {
         try {
-            FileOutputStream out = new FileOutputStream(/*conf.getOutDir() + "/"*/conf.getTempDir() + "/" + conf.getOutFileName());
+            FileOutputStream out = new FileOutputStream(conf.getTempDir() + "/" + conf.getOutFileName());
             workbook.write(out);
             out.flush();
             out.close();

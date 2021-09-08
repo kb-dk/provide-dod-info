@@ -180,7 +180,7 @@ public class AlmaMetadataRetriever {
             NodeList marcResults = (NodeList) marcResultsXpath.evaluate(doc, XPathConstants.NODESET);
 
             Node marc = marcResults.item(0);
-
+            System.setProperty("line.separator", "\n");
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");

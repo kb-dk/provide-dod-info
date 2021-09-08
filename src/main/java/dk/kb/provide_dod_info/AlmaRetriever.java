@@ -259,23 +259,6 @@ public class AlmaRetriever {
                 String barcode = getBarcode(fileName);
                 if (StringUtils.isNotEmpty(barcode)){
                     retrieveMetadataForBarcode(dir, barcode, data, fileName);
-//                    if (isNumeric(releaseYear)) {
-//                        if (Integer.parseInt(releaseYear) < cutYear) {
-//                            log.debug("Create text file for pdf-file: {}", fileName);
-//                            try {
-//                                UxCmdUtils.execCmd("pdftotext "                                        // command
-//                                        + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
-//                                        + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
-//                            } catch (Exception e) {
-//                                log.error("Could not make text file from pdf for: {}\n", fileName);
-////                                log.error("Stack: ");
-////                                e.printStackTrace();
-//                            }
-//                        }
-//                    } else {
-//                        log.error("Value of 'Year' is invalid: {}", releaseYear);
-//
-//                    }
                 }
             }
         }

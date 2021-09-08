@@ -54,13 +54,13 @@ public class AlmaExtract {
             AlmaMetadataRetriever almaMetadataRetriever = new AlmaMetadataRetriever(conf, httpClient);
             AlmaRetriever almaRetriever = new AlmaRetriever(conf, almaMetadataRetriever);
             almaRetriever.retrieveAlmaMetadataForFiles(workbook);
-
+            workbook.close();
             DataHandler dataHandler = new DataHandler(conf);
             String excelFile = conf.getTempDir().getName() + "/"  + conf.getOutFileName();
             File existingExcelFile = FileUtils.getExistingFile(excelFile);
             String absolutePathExcelFile = existingExcelFile.getAbsolutePath();
 
-//                dataHandler.addReadMeIDE();
+//            dataHandler.addReadMeIDE();
             dataHandler.addReadMe();
 
             Map<String, String> values;
@@ -75,12 +75,12 @@ public class AlmaExtract {
             FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + outZipFilename);
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File dirToZip = new File(sourceDir);
-
             ZipUtils.zipFile(dirToZip, dirToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
             FileUtils.deleteDirectory( conf.getTempDir());
-            log.debug("Output ready");
+            log.debug("****************Output ready***************");
+            System.exit(0); // make sure the program exits
 
         } catch (Exception e ) {
             throw new IllegalStateException("Something went wrong. Check log for errors", e);

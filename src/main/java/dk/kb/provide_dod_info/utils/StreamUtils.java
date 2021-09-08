@@ -29,16 +29,13 @@ public final class StreamUtils {
         ArgumentCheck.checkNotNull(in, "InputStream in");
         ArgumentCheck.checkNotNull(out, "OutputStream out");
 
-        try {
+        try (in; out) {
             byte[] buf = new byte[IO_BUFFER_SIZE];
             int bytesRead;
             while ((bytesRead = in.read(buf)) != -1) {
                 out.write(buf, 0, bytesRead);
             }
             out.flush();
-        } finally {
-            in.close();
-            out.close();
         }
     }
 

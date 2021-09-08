@@ -32,14 +32,14 @@ Build:
 mvn clean package -DskipTests
 ```
 
-Extract the file provide-dod-info-*version*-distribution.tar.gz (*version* must be replaced by the correct version number e.g. 1.1)
+Extract the file provide-dod-info-*version*-distribution.tar.gz (*version* must be replaced by the correct version number e.g. 1.0.0)
 to wanted directory e.g.:
 ```
-tar -xf target/provide-dod-info-1.1-distribution.tar.gz -C directory/
+tar -xf provide-dod-info-1.0.0-distribution.tar.gz -C .
 ```
-and then run with provide-dod-info.yml file placed as appropriate:
+and then run from the same directory it was unpacked to and add path to provide-dod-info.yml file as parameter e.g.:
 ```
-directory/provide-dod-info-version/bin/provide-dod-info.sh path-to/provide-dod-info.yml
+provide-dod-info-1.0.0/bin/provide-dod-info.sh ./provide-dod-info.yml
 ```
 
 
