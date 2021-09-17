@@ -15,8 +15,8 @@
     </parent>
     <scm>
         <url>https://github.com/kb-dk/provide-dod-info</url>
-        <connection>scm:git:ssh://git@github.com:kb-dk/provide-dod-info.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:kb-dk/provide-dod-info.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com/kb-dk/provide-dod-info.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/kb-dk/provide-dod-info.git</developerConnection>
     </scm>
 
     <repositories>
