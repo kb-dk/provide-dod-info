@@ -6,7 +6,7 @@
 
     <groupId>dk.kb</groupId>
     <artifactId>provide-dod-info</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>dk.statsbiblioteket.sbprojects</groupId>
@@ -14,7 +14,7 @@
         <version>23</version>
     </parent>
     <scm>
-        <url>https://github.com/kb-dk//provide-dod-info</url>
+        <url>https://github.com/kb-dk/provide-dod-info</url>
         <connection>scm:git:git@github.com:kb-dk/provide-dod-info.git</connection>
         <developerConnection>scm:git:git@github.com:kb-dk/provide-dod-info.git</developerConnection>
         <tag>HEAD</tag>
