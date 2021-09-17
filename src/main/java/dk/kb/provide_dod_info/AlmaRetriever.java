@@ -170,7 +170,7 @@ public class AlmaRetriever {
             return res;
 
         }catch (IllegalStateException e){
-            log.error("Year of release was not found!");
+            log.warn("Year of release was not found!");
             return null;
         }
         catch (Exception e) {
@@ -276,7 +276,7 @@ public class AlmaRetriever {
             getAlmaMetadataForBarcode(barcode, metadataFile, data, fileName);
         } catch (Exception e) {
             log.info("Failure while trying to retrieve the Alma metadata for the directory '"
-                + dir.getAbsolutePath() + "'", e);
+                + dir.getAbsolutePath() + "'" + "Barcode: " + barcode, e);
         }
     }
 
@@ -310,9 +310,8 @@ public class AlmaRetriever {
                                 + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
                                 + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
                     } catch (Exception e) {
-                        log.error("Could not make text file from pdf for: {}\n", fileName);
-//                                log.error("Stack: ");
-//                                e.printStackTrace();
+                        log.warn("Could not make text file from pdf for: {}\n", fileName);
+//                                log.debug("Stack: "); e.printStackTrace();
                     }
                     if (FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
                         data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,

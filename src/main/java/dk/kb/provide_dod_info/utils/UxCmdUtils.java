@@ -40,7 +40,7 @@ public class UxCmdUtils {
             Executors.newSingleThreadExecutor().submit(streamGobbler);
             int exitCode = process.waitFor();
             if (exitCode != 0){
-                log.error("UNIX command '{}' failed, exit code = {}", param, exitCode);
+                log.warn("UNIX command '{}' failed, exit code = {}", param, exitCode);
 //                throw new IllegalStateException("UNIX command failed");
             }
 

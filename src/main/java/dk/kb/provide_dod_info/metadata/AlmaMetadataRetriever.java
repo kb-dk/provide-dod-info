@@ -172,7 +172,7 @@ public class AlmaMetadataRetriever {
             // TODO: should we also fail, when it has more than 1 number of results?
             String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
             numRes = numResults;
-            if(!numResults.equals("1")) {
+            if(!"1".equals(numResults)) {
                 throw new IllegalStateException("Did not receive exactly 1 result from Alma. Received: " + numResults);
             }
 
@@ -209,7 +209,7 @@ public class AlmaMetadataRetriever {
             // TODO: should we also fail, when it has more than 1 number of results?
             String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
             numRes = numResults;
-            if(!numResults.equals("1")) {
+            if(!"1".equals(numResults)) {
                 throw new IllegalStateException("Did not receive exactly 1 result from Alma. Received: " + numResults);
             }
 

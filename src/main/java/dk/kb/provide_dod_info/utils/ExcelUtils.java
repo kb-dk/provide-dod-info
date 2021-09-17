@@ -1,9 +1,12 @@
 package dk.kb.provide_dod_info.utils;
 
+import dk.kb.provide_dod_info.AlmaRetriever;
 import dk.kb.provide_dod_info.Constants;
 import dk.kb.provide_dod_info.config.Configuration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -102,7 +105,7 @@ public class ExcelUtils {
      * @return map with barcode and year
      */
     public static Map<String, String> getValues(String pathToExcel) throws IOException {
-//        DataFormatter formatter = new DataFormatter();
+        DataFormatter formatter = new DataFormatter();
         FileInputStream fis = null;
         try {
             File file = new File(String.valueOf(pathToExcel));
@@ -146,9 +149,11 @@ public class ExcelUtils {
                     if (row.getRowNum() > 0) {
                         Cell barcodeCell = row.getCell(barcodeColumn);
                         Cell yearCell = row.getCell(yearColumn);
-                        String barcode = barcodeCell.getStringCellValue(); //formatter.formatCellValue(barcodeCell);
-                        String year = yearCell.getStringCellValue(); // formatter.formatCellValue(yearCell);
-                        data.put(barcode, year);
+                        String barcode = formatter.formatCellValue(barcodeCell);
+                        String year = formatter.formatCellValue(yearCell);
+                        if (AlmaRetriever.isNumeric(year) && StringUtils.isNotEmpty(barcode)) {
+                            data.put(barcode, year);
+                        }
                     }
                 }
                 return data;
