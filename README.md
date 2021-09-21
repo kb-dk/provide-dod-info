@@ -26,12 +26,12 @@ provide-dod-info:
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
 
 ```
-# Execution
-Build:
+#Build
+To create the release package, retrieve the project from GitHub and build with:
 ```
 mvn clean package -DskipTests
 ```
-
+# Execution
 Extract the file provide-dod-info-*version*-distribution.tar.gz (*version* must be replaced by the correct version number e.g. 1.0.0)
 to wanted directory e.g.:
 ```
