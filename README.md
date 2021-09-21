@@ -26,7 +26,7 @@ provide-dod-info:
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
 
 ```
-#Build
+# Build
 To create the release package, retrieve the project from GitHub and build with:
 ```
 mvn clean package -DskipTests
