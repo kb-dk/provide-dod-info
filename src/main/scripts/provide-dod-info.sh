@@ -16,6 +16,4 @@ fi
 
 CLASS_PATH="${CLASS_PATH_OVERRIDE:-"$SCRIPT_DIR/../lib/*"}"
 JAVA_OPTS=${JAVA_OPTS:-"-Xmx256m -Xms256m"}
-#cp "$SCRIPT_DIR"/../conf/readme.txt .
 java "$JAVA_OPTS" -classpath "$CLASS_PATH"  "$MAIN_CLASS" "$@"
-#rm -rf "$SCRIPT_DIR"/../conf/readme.txt

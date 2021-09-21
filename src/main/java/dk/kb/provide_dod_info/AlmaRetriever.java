@@ -119,8 +119,7 @@ public class AlmaRetriever {
                     XPathExpression issuedYearXpath = xpath.compile(XP_MARC_FIND_YEAR);
                     String  rYr = (String) issuedYearXpath.evaluate(doc, XPathConstants.STRING);
                     releaseYear = rYr.substring(7,11);
-                    if (!isNumeric(releaseYear)){
-                        releaseYear = null;
+                    if (!isNumeric(releaseYear) || "0000".equals(releaseYear)){
                         throw new IllegalStateException();
                     }
                     res = releaseYear;
@@ -171,6 +170,7 @@ public class AlmaRetriever {
 
         }catch (IllegalStateException e){
             log.warn("Year of release was not found!");
+            releaseYear = null;
             return null;
         }
         catch (Exception e) {
@@ -311,7 +311,7 @@ public class AlmaRetriever {
                                 + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
                     } catch (Exception e) {
                         log.warn("Could not make text file from pdf for: {}\n", fileName);
-//                                log.debug("Stack: "); e.printStackTrace();
+                                log.trace("Stack: "); e.printStackTrace();
                     }
                     if (FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
                         data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
