@@ -4,5 +4,5 @@ provide-dod-info:
   cut_year: 1881
   out_file_name: AlmaExtractResult.xlsx
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
-
+  is_test: true
 

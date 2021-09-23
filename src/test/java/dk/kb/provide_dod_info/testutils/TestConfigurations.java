@@ -45,6 +45,7 @@ public class TestConfigurations {
             confMap.put(Configuration.CONF_CUT_YEAR, 1881);
             confMap.put(Configuration.CONF_OUT_FILE_NAME, "/AlmaExtractResult.xlsx");
             confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
+            confMap.put(Configuration.IS_TEST, true);
 
             return new Configuration(confMap);
         } catch (Exception e) {

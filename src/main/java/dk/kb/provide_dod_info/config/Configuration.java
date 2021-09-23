@@ -70,6 +70,8 @@ public class Configuration {
     /** The configuration name for the output file */
     public static final String CONF_OUT_FILE_NAME = "out_file_name";
 
+    public static final String IS_TEST = "is_test";
+
     /** The directory containing the pdf files for which to extract Alma data */
     protected final File corpusOrigDir;
     /** The directory for the output files.*/
@@ -83,6 +85,8 @@ public class Configuration {
     protected final String almaSruSearchConfiguration;
     /** The name of the Excel file containing the data extracted from Alma */
     protected final String outFileName;
+
+    protected final Boolean isTest;
 
 
     /**
@@ -104,7 +108,7 @@ public class Configuration {
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
         this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
         this.outFileName = (String) confMap.get(CONF_OUT_FILE_NAME);
-
+        this.isTest = (Boolean) confMap.get(IS_TEST);
     }
 
     /** @return The alma sru search base.*/
@@ -132,6 +136,9 @@ public class Configuration {
         return tmpDir;
     }
 
+    public Boolean getIsTest() {
+        return isTest;
+    }
     /**
      * Creates a configuration from a file.
      * @param yamlFile The YAML file with the configuration.

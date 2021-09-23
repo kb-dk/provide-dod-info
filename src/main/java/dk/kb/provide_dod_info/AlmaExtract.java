@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
@@ -60,8 +62,10 @@ public class AlmaExtract {
             File existingExcelFile = FileUtils.getExistingFile(excelFile);
             String absolutePathExcelFile = existingExcelFile.getAbsolutePath();
 
-//            dataHandler.addReadMeIDE();
-            dataHandler.addReadMe();
+            if (conf.getIsTest()) {
+                dataHandler.addReadMeIDE();
+            }
+//            dataHandler.addReadMe();
 
             Map<String, String> values;
             if (StringUtils.isNotEmpty(absolutePathExcelFile)) {
@@ -86,4 +90,21 @@ public class AlmaExtract {
             throw new IllegalStateException("Something went wrong. Check log for errors", e);
         }
     }
+
+    /**
+     * Retrieves the different kinds of metadata for given ISBN number.
+     * @param almaMetadataRetriever The Alma metadata retriever.
+     * @param barcode The ISBN number of the record to retrieve the metadata for.
+     */
+    protected static void retrieveMetadataForBarcode(AlmaMetadataRetriever almaMetadataRetriever,
+                                                     String barcode) throws IOException {
+        log.info("Retrieving the metadata for barcode: '" + barcode + "'");
+        File modsMetadataFile = new File(outputDir, barcode + ".marc.xml");
+        try (OutputStream out = new FileOutputStream(modsMetadataFile)) {
+            almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
+            //Saved to modsMetadataFile
+        }
+        log.info("Metadata for barcode '" + barcode + "' can be found at: " + modsMetadataFile.getAbsolutePath());
+   }
+
 }
