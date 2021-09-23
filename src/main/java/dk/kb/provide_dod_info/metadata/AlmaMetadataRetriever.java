@@ -29,7 +29,7 @@ import java.io.OutputStream;
 /**
  * Alma Metadata Retriever.
  *
- * Makes a direct borcode search in Alma and extracts the MARC records.
+ * Makes a direct barcode search in Alma and extracts the MARC records.
  *
  * It should create MARC retrieval URLs like the following:
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=mods&query=isbn=$ISBN
@@ -109,11 +109,11 @@ public class AlmaMetadataRetriever {
         extractMarcFromAlma(byteArrayInputStream, out);
     }
 
-    /**
-     * Retrieves the MODS metadata for a given ISBN from Alma.
-     * @param isbn The ID to retrieve the Alma metadata for.
-     * @param out The output stream, where the MODS metadata from Alma will be written.
-     */
+//    /**
+//     * Retrieves the MODS metadata for a given ISBN from Alma.
+//     * @param isbn The ID to retrieve the Alma metadata for.
+//     * @param out The output stream, where the MODS metadata from Alma will be written.
+//     */
 //    public void retrieveMetadataForISBN(String isbn, OutputStream out) {
 //        ArgumentCheck.checkNotNullOrEmpty(isbn, "String isbn");
 //        ArgumentCheck.checkNotNull(out, "OutputStream out");
@@ -140,11 +140,11 @@ public class AlmaMetadataRetriever {
             throw new IllegalStateException("Could not download the metadata for set '" + barcode + "'", e);
         }
     }
-    /**
-     * Retrieves the Alma metadata for the given ISBN and writes it to the output stream.
-     * @param isbn The ISBN number for the record to retrieve metadata for.
-     * @param out Output stream where the retrieved metadata is written.
-     */
+//    /**
+//     * Retrieves the Alma metadata for the given ISBN and writes it to the output stream.
+//     * @param isbn The ISBN number for the record to retrieve metadata for.
+//     * @param out Output stream where the retrieved metadata is written.
+//     */
 //    protected void retrieveAlmaMetadata(String isbn, OutputStream out) {
 //        log.debug("Retrieving Alma metadata for ISBN: " + isbn);
 //

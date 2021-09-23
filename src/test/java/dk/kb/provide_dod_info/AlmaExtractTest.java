@@ -9,7 +9,6 @@ import org.jaccept.structure.ExtendedTestCase;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -45,7 +44,6 @@ public class AlmaExtractTest extends ExtendedTestCase {
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-//    @Ignore
     public void testNotEnoughArguments() {
         addDescription("Test the case, when not enough argument are given.");
         try {
@@ -57,7 +55,6 @@ public class AlmaExtractTest extends ExtendedTestCase {
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-//    @Ignore
     public void testFailToConnect() {
         addDescription("Test the case, when we cannot connect to the Alma server.");
         try {
@@ -69,7 +66,6 @@ public class AlmaExtractTest extends ExtendedTestCase {
     }
 
     @Test
-//    @Ignore
     public void testRetrieveMetadataForBarcode() throws IOException {
         addDescription("Test the retrieveMetadataForBarcode method.");
 

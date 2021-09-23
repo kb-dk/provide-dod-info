@@ -64,9 +64,9 @@ public class AlmaExtract {
 
             if (conf.getIsTest()) {
                 dataHandler.addReadMeIDE();
+            } else {
+                dataHandler.addReadMe();
             }
-//            dataHandler.addReadMe();
-
             Map<String, String> values;
             if (StringUtils.isNotEmpty(absolutePathExcelFile)) {
                 values = ExcelUtils.getValues(absolutePathExcelFile);
@@ -92,19 +92,19 @@ public class AlmaExtract {
     }
 
     /**
-     * Retrieves the different kinds of metadata for given ISBN number.
+     * Retrieves the different kinds of metadata for given barcode.
      * @param almaMetadataRetriever The Alma metadata retriever.
-     * @param barcode The ISBN number of the record to retrieve the metadata for.
+     * @param barcode The barcode of the record to retrieve the metadata for.
      */
     protected static void retrieveMetadataForBarcode(AlmaMetadataRetriever almaMetadataRetriever,
                                                      String barcode) throws IOException {
         log.info("Retrieving the metadata for barcode: '" + barcode + "'");
-        File modsMetadataFile = new File(outputDir, barcode + ".marc.xml");
-        try (OutputStream out = new FileOutputStream(modsMetadataFile)) {
+        File marcMetadataFile = new File(outputDir, barcode + ".marc.xml");
+        try (OutputStream out = new FileOutputStream(marcMetadataFile)) {
             almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
-            //Saved to modsMetadataFile
+            //Saved to marcMetadataFile
         }
-        log.info("Metadata for barcode '" + barcode + "' can be found at: " + modsMetadataFile.getAbsolutePath());
+        log.info("Metadata for barcode '" + barcode + "' can be found at: " + marcMetadataFile.getAbsolutePath());
    }
 
 }
