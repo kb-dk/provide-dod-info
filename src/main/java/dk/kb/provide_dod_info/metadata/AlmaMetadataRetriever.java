@@ -169,7 +169,6 @@ public class AlmaMetadataRetriever {
             Document doc = builder.parse(almaInput);
             XPath xpath = xPathFactory.newXPath();
 
-            // TODO: should we also fail, when it has more than 1 number of results?
             String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
             numRes = numResults;
             if(!"1".equals(numResults)) {
@@ -206,7 +205,6 @@ public class AlmaMetadataRetriever {
             Document doc = builder.parse(almaInput);
             XPath xpath = xPathFactory.newXPath();
 
-            // TODO: should we also fail, when it has more than 1 number of results?
             String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
             numRes = numResults;
             if(!"1".equals(numResults)) {

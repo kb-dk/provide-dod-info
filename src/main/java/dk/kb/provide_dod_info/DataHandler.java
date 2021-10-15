@@ -50,7 +50,7 @@ public class DataHandler {
 
     public void addReadMe() {
         try {
-            //todo: extract version from pom
+            //todo: extract version from pom, hmm can't do like readme
             UxCmdUtils.execCmd("jar xf " +                               // extract
                     "provide-dod-info-1.0.3/lib/provide-dod-info-1.0.3.jar " + // fromFile
                     "readme.txt " );                                           // file to extract

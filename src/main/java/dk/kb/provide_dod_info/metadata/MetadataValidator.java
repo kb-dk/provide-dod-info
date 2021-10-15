@@ -65,10 +65,8 @@ public class MetadataValidator {
      * @param entityResolver XML entity resolver or null.
      * @param errorHandler error handler or null.
      * @return XML validation result.
-     * @throws IOException If the validation .
      */
-    public boolean validate(InputStream in, EntityResolver entityResolver,
-            XmlErrorHandler errorHandler) throws IOException {
+    public boolean validate(InputStream in, EntityResolver entityResolver, XmlErrorHandler errorHandler) {
         ArgumentCheck.checkNotNull(in, "InputStream in");
         if (errorHandler == null) {
             errorHandler = new XmlErrorHandler();

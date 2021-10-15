@@ -20,11 +20,10 @@ public class ZipUtils {
         if (fileToZip.isDirectory()) {
             if (fileName.endsWith("/")) {
                 zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
             } else {
                 zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
             }
+            zipOut.closeEntry();
             File[] children = fileToZip.listFiles();
             if (children != null) {
                 for (File childFile : children) {

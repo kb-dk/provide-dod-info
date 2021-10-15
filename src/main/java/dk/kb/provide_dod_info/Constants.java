@@ -49,9 +49,9 @@ public class Constants {
     /** The XPATH for extracting the Classification from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_CLASSIFICATION = "recordData/record/datafield[@tag='084']/subfield[@code='o']/text()";
 
-    public static String OK = "OK";
-    public static String NOK = "NOK";
-    public static String SHEETNAME = "Alma results";
+    public static final String OK = "OK";
+    public static final String NOK = "NOK";
+    public static final String SHEETNAME = "Alma results";
 
     public enum ExtractInfo {
         YEAR, AUTHOR, TITLE, PUBPLACE, PUBLISHER, CLASSIFICATION
