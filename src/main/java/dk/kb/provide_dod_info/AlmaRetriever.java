@@ -38,7 +38,7 @@ import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
 /**
  * The AlmaRetriever
  * It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
- * wanted pdf-files (ends with -bw.pdf). //todo: -color.pdf?
+ * wanted pdf-files (ends with -color.pdf). (-bw->-color)
  * It will then use this barcode to retrieve the MARC data for the related record from Alma in a xml file.
  * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file together with specific
  * metadata from the MARC xml file above.
@@ -223,7 +223,7 @@ public class AlmaRetriever {
         log.debug("Getting barcode.");
         String barcode;
         try {
-            barcode = fileName.replaceAll("-bw.pdf", "").replaceAll(".pdf", ""); //todo: -bw.pdf -> -color.pdf ??
+            barcode = fileName.replaceAll("-color.pdf", "").replaceAll(".pdf", ""); //-bw.pdf->-color.pdf
         }
         catch (Exception e) {
             log.debug("Wrong fileName format. Barcode could not be retrieved, returning 'null'");
@@ -252,7 +252,7 @@ public class AlmaRetriever {
         } else {
             List<String> fileNames = Arrays.stream(files)
                     .map(File::getName)
-                    .filter(name -> name.matches("^(?!.*(-color|_color|_bw|xml)).*$")) // remove unwanted files todo: -color -> -bw ??
+                    .filter(name -> name.matches("^(?!.*(-bw|_color|_bw|xml)).*$")) // remove unwanted files (-color->-bw)
                     .collect(Collectors.toList());
 
             for(String fileName : fileNames) {
