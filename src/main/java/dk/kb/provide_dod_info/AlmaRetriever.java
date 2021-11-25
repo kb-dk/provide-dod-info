@@ -153,7 +153,7 @@ public class AlmaRetriever {
                     XPathExpression publisherXpath = xpath.compile(XP_MARC_FIND_PUBLISHER);
                     String publisher = (String) publisherXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(publisher)) {
-                        res = publisher.replaceAll("[\\]\\[:,]", "");
+                        res = publisher.replaceAll("[\\[\\]:,]", "");
                     } else { res = "N/A";}
                     break;
                 case CLASSIFICATION:
