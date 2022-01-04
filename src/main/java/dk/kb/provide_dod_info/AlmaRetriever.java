@@ -153,7 +153,7 @@ public class AlmaRetriever {
                     XPathExpression publisherXpath = xpath.compile(XP_MARC_FIND_PUBLISHER);
                     String publisher = (String) publisherXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(publisher)) {
-                        res = publisher.replaceAll("[ \\]\\[:,]", "");
+                        res = publisher.replaceAll("[\\[\\]:,]", "");
                     } else { res = "N/A";}
                     break;
                 case CLASSIFICATION:
@@ -243,7 +243,8 @@ public class AlmaRetriever {
         FilenameFilter filter = (f, name) -> name.endsWith(".pdf");
         File[] files = dir.listFiles(filter);
 
-        if(files == null ) {
+        assert files != null : "List of files is null";
+        if(Arrays.stream(files).findFirst().isEmpty() ) {
             row++;
             data.put(String.valueOf(row), new Object[] {"", "No files to retrieve and get Alma metadata for in this directory: "
                     + dir.getAbsolutePath()});

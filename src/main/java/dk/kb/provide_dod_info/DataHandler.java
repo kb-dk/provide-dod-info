@@ -52,7 +52,7 @@ public class DataHandler {
         try {
             //todo: extract version from pom, hmm can't do like readme
             UxCmdUtils.execCmd("jar xf " +                               // extract
-                    "provide-dod-info-1.0.3/lib/provide-dod-info-1.0.3.jar " + // fromFile
+                    "provide-dod-info-1.0.4/lib/provide-dod-info-1.0.4.jar " + // fromFile
                     "readme.txt " );                                           // file to extract
             UxCmdUtils.execCmd("chmod -x readme.txt");
             File fromReadme = new File("readme.txt");
