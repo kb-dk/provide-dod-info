@@ -49,6 +49,7 @@ public class DataHandler {
     }
 
     public void addReadMe() {
+        log.info("addReadMe entered");
         try {
             //todo: extract version from pom, hmm can't do like readme
             UxCmdUtils.execCmd("jar xf " +                               // extract
@@ -64,6 +65,7 @@ public class DataHandler {
     }
 
     public void sortDirectories(Map<String, String> data) {
+        log.info("sortDirectories entered");
 
         String regEx = "^(14)[0-4][0-9]$";
         String subDir = "/1400to1449";
@@ -107,6 +109,7 @@ public class DataHandler {
     }
 
     private void moveToSubDirs(Map<String, String> data, String regEx, String subDir) {
+        log.info("moveToSubDirs entered");
         List<Map.Entry<String, String>> entryList = data.entrySet().stream()
                 .filter(a -> a.getValue().matches(regEx))
                 .collect(Collectors.toList());
