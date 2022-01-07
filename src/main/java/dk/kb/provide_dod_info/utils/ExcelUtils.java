@@ -105,6 +105,7 @@ public class ExcelUtils {
      * @return map with barcode and year
      */
     public static Map<String, String> getValues(String pathToExcel) throws IOException {
+        log.debug("getValues entered");
         DataFormatter formatter = new DataFormatter();
         FileInputStream fis = null;
         try {
@@ -172,6 +173,7 @@ public class ExcelUtils {
 
     public static void createExcel(XSSFWorkbook workbook, Configuration conf) {
         try {
+            log.debug("createExcel entered");
             FileOutputStream out = new FileOutputStream(conf.getTempDir() + "/" + conf.getOutFileName());
             workbook.write(out);
             out.flush();
