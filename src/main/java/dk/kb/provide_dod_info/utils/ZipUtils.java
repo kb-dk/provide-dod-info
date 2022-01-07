@@ -13,35 +13,41 @@ import java.util.zip.ZipOutputStream;
 public class ZipUtils {
     private static final Logger log = LoggerFactory.getLogger(ZipUtils.class);
 
-    public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+    public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) {
+        log.info("zipFile entered");
         if (fileToZip.isHidden()) {
             return;
         }
-        if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/")) {
-                zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
-            } else {
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
-            }
-            File[] children = fileToZip.listFiles();
-            if (children != null) {
-                for (File childFile : children) {
-                    zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+        try {
+            if (fileToZip.isDirectory()) {
+                if (fileName.endsWith("/")) {
+                    zipOut.putNextEntry(new ZipEntry(fileName));
+                    zipOut.closeEntry();
+                } else {
+                    zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+                    zipOut.closeEntry();
                 }
+                File[] children = fileToZip.listFiles();
+                if (children != null) {
+                    for (File childFile : children) {
+                        zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                    }
+                }
+                return;
             }
-            return;
+            FileInputStream fis = new FileInputStream(fileToZip);
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        } catch (IOException e) {
+            log.warn("Zipping failed");
+            e.printStackTrace();
         }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
-        }
-        fis.close();
     }
 
 }

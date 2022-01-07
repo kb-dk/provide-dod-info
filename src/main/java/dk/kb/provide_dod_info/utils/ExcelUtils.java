@@ -105,6 +105,7 @@ public class ExcelUtils {
      * @return map with barcode and year
      */
     public static Map<String, String> getValues(String pathToExcel) throws IOException {
+        log.info("getValues entered");
         DataFormatter formatter = new DataFormatter();
         FileInputStream fis = null;
         try {
@@ -156,6 +157,7 @@ public class ExcelUtils {
                         }
                     }
                 }
+                log.info("getValues, returning data");
                 return data;
             }
         }
@@ -172,10 +174,13 @@ public class ExcelUtils {
 
     public static void createExcel(XSSFWorkbook workbook, Configuration conf) {
         try {
+            log.info("createExcel entered");
             FileOutputStream out = new FileOutputStream(conf.getTempDir() + "/" + conf.getOutFileName());
             workbook.write(out);
             out.flush();
             out.close();
+            log.info("createExcel done");
+
         }
         catch (Exception e) {
             log.error("Failed to write Excel-file.");
