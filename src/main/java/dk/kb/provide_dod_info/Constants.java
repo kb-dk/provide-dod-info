@@ -40,9 +40,9 @@ public class Constants {
 
     public static final String XPATH_LINK_TO_ECOLLECTION = "/*[local-name()='searchRetrieveResponse']" +
             "/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']" +
-            "//*[local-name()='datafield'][@tag='999']/*[local-name()='subfield'][@code='a']/text()";
+            "/*[local-name()='datafield'][@tag='999']/*[local-name()='subfield'][@code='a']/text()";
 
-    public static final String XP_FIND_ECOLLECTION = "recordData/record/datafield[@tag='999']/subfield[@code='a']/text()";
+    public static final String XP_MARC_FIND_ECOLLECTION = "recordData/record/datafield[@tag='999']/subfield[@code='a']/text()";
 
 
     /** The XPATH for the number of records.

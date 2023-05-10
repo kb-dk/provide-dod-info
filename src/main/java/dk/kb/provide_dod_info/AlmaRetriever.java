@@ -92,11 +92,11 @@ public class AlmaRetriever {
         data.put(String.valueOf(row), new Object[] {"Barcode", "Alma", "Year", "Place", "Author", "Publisher",
                 "Classification", "Title"});
 
-//        if(eCollection == null) {
+        if(eCollection == null) {
             traverseFilesInFolder(conf.getCorpusOrigDir(), data);
-//        } else {
-//            RenameThis_getECollection(conf.getCorpusOrigDir(), eCollection, data);
-//        }
+        } else {
+            traversECollection(conf.getCorpusOrigDir(), data);
+        }
         XSSFSheet sheet = workbook.createSheet(SHEETNAME);
         ExcelUtils.populateSheet(sheet, data);
 //        ExcelUtils.setWorkbookFormats(workbook);
@@ -171,8 +171,10 @@ public class AlmaRetriever {
                     } else { res = "N/A";}
                     break;
                 case E_COLLECTION:
+                    //WARNING: only searches the first 999 subfield.
+                    // See AlmaMetadataRetriever.extractXpathValue for correct way to do it
                     log.trace("Extracting ECollection");
-                    XPathExpression eCollectionXpath = xpath.compile(XP_FIND_ECOLLECTION);
+                    XPathExpression eCollectionXpath = xpath.compile(XP_MARC_FIND_ECOLLECTION);
                     String eCol = (String) eCollectionXpath.evaluate(doc, XPathConstants.STRING);
                     if (StringUtils.isNotEmpty(eCol)) {
                         res = eCol;
@@ -250,8 +252,8 @@ public class AlmaRetriever {
 
     /**
      * Traverses the files in the base directory to retrieve the Alma metadata.
-
-     * @param dir The base directory for the pdf-files.
+     * @param dir The base directory of the pdf-files.
+     * @param data The data to add to the Excel sheet
      */
     private void traverseFilesInFolder(File dir, Map<String, Object[]> data) {
         FilenameFilter filter = (f, name) -> name.endsWith(".pdf");
@@ -279,43 +281,49 @@ public class AlmaRetriever {
         }
     }
 
-    private void RenameThis_getECollection(File dir, Map<String, Object[]> data) {
+    /**
+     * Traverses the Electronic Collection and returns metadata for the related barcodes that are extracted from the
+     * records in the Electronic Collection
+     * @param dir The base directory of the pdf-files.
+     * @param data The data to add to the Excel sheet
+     */
+    private void traversECollection(File dir, Map<String, Object[]> data) {
         File metadataFile = new File(conf.getTempDir(), "dummy" + Constants.MARC_METADATA_SUFFIX);
         try (OutputStream out = new FileOutputStream(metadataFile)) {
-            String noOfRecs = getAlmaMetadataForECollection(1, out, XPATH_LINK_TO_ECOLLECTION);
-            int a = 1;
-            int nor = Integer.parseInt(noOfRecs);
+            String noOfRecsInECollection = getAlmaMetadataForECollection(1, out, XPATH_NUM_RESULTS).get(0);
+            int nor = Integer.parseInt(noOfRecsInECollection);
 
             for (int i = 1; i <= nor ; i++) {
-                String link = getAlmaMetadataForECollection(i, out, XPATH_LINK_TO_E_EDITION);
-                String fileNameE = StringUtils.substringAfterLast(link,"/");
-                String barcodeE = StringUtils.substringBefore(fileNameE, "-");
-                retrieveMetadataForBarcode(dir, barcodeE, data, fileNameE);
-                FileUtils.deleteFile(metadataFile);
+                List<String> links = getAlmaMetadataForECollection(i, out, XPATH_LINK_TO_E_EDITION);
 
+                for (String link:links) {
+                    String fileName = StringUtils.substringAfterLast(link, "/");
+                    String barcode = StringUtils.substringBefore(fileName, "-");
+
+                    retrieveMetadataForBarcode(dir, barcode, data, fileName);
+                }
+//                FileUtils.deleteFile(metadataFile);
             }
-
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new IllegalStateException("traversECollection failed" ,ex);
         }
     }
 
     /**
-     * Get metadata from an ALMA record
+     * Get metadata from an electronic ALMA record for a specific XPATH
      * @param recNo the number of the record to extract metadata for
      * @param out Output stream to write to
      * @param xPath The XPATH to the field to retrieve
      * @return The contents of the XPATH field
      */
-    private String getAlmaMetadataForECollection( int recNo, OutputStream out, String xPath) {
-        ByteArrayInputStream byteArrayInputStream =
-                almaMetadataRetriever.retrieveMetadataForECollection(eCollection, recNo, out);
+    private List<String>  getAlmaMetadataForECollection( int recNo, OutputStream out, String xPath) {
+        ByteArrayInputStream is = almaMetadataRetriever.retrieveMetadataForECollection(eCollection, recNo, out);
 
-        return almaMetadataRetriever.extractXpathValue(byteArrayInputStream, xPath);
+        return almaMetadataRetriever.extractXpathValue(is, xPath);
     }
 
     /**
-     * Retrieve the metadata for a given barcode.
+     * Retrieve the metadata for a given barcode from the physical record.
      * It retrieves the Alma metadata in MARC format, creates an xml file with the data
      *  and puts the xml file in outDir from Yaml configuration file.
      * @param dir The directory, where the metadata-file will be placed.
@@ -331,7 +339,7 @@ public class AlmaRetriever {
     }
 
     /**
-     * Retrieves the Alma record metadata file for a given barcode.
+     * Retrieves the Alma physical record metadata file for a given barcode.
      * Generate OCR txt-files from the pdf-files using 'pdftotext'
      * "OK" is written in the excel sheet if success and data is added.
      * A fail message is written in the excel sheet if no data is retrieved.

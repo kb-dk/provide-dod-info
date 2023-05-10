@@ -29,18 +29,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Alma Metadata Retriever.
- *
  * Makes a direct barcode search in Alma and extracts the MARC records.
- *
  * It should create MARC retrieval URLs like the following:
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=mods&query=isbn=$ISBN
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=marcxml&query=alma.barcode=$BARCODE
- * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=1&recordSchema=marcxml&query=alma.packageName=Historisk_laerebogssamling
+ * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=1&recordSchema=marcxml&query=alma.packageName=$ELECTRONIC_COLLECTION
  * To get all query options use:
- * <a href="http://bibsys-network.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK?version=1.2&operation=explain">...</a>
+ * <a href="https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=explain">...</a>
  */
 public class AlmaMetadataRetriever {
     /** The logger.*/
@@ -98,7 +98,7 @@ public class AlmaMetadataRetriever {
     }
 
     /**
-     * Retrieves the MARC metadata for a given barcode from Alma.
+     * Retrieves the MARC metadata for a given barcode from a physical Alma record.
      * @param barcode The ID to retrieve the Alma metadata for.
      * @param out The output stream, where the MARC metadata from Alma will be written.
      */
@@ -142,23 +142,31 @@ public class AlmaMetadataRetriever {
         }
     }
 
-    public String extractXpathValue(InputStream almaInput, String xPath ){
+    /**
+     *  Extract the value(s) of a specific XPATH
+     * @param almaInput the Alma xml-input stream
+     * @param xPath The path to the wanted Node
+     * @return A list containing the values of the XPATH
+     */
+    public List<String> extractXpathValue(InputStream almaInput, String xPath ){
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(almaInput);
             XPath xpath = xPathFactory.newXPath();
+            NodeList nodeList = (NodeList) xpath.compile(xPath).evaluate(doc, XPathConstants.NODESET);
+            List<String> linkList = new ArrayList<>();
 
-//            return (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
-
-
-            return (String) xpath.evaluate(xPath, doc, XPathConstants.STRING);
-                    //searchRetrieveResponse/records/record/recordData/record/datafield[@tag='856']/subfield[@code='u']/text()
-            ///*[local-name()='searchRetrieveResponse']/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']/*[local-name()='datafield'][@tag='856']/*[local-name()='subfield'][@code='u']/text()
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node nLink = nodeList.item(i);
+                String link = nLink.getNodeValue();
+                linkList.add(link);
+            }
+            return linkList;
 
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
-            throw new IllegalStateException("Could not get number of records in Electronic Collection", e);
+            throw new IllegalStateException("Could not get a value from requested XPATH ", e);
         }
     }
 
