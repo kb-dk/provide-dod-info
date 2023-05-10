@@ -14,7 +14,7 @@ public class ZipUtils {
     private static final Logger log = LoggerFactory.getLogger(ZipUtils.class);
 
     public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) {
-        log.info("zipFile entered");
+        log.trace("zipFile entered");
         if (fileToZip.isHidden()) {
             return;
         }

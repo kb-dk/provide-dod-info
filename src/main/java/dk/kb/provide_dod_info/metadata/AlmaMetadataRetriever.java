@@ -3,14 +3,17 @@ package dk.kb.provide_dod_info.metadata;
 import dk.kb.provide_dod_info.HttpClient;
 import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.exception.ArgumentCheck;
+import static dk.kb.provide_dod_info.Constants.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -19,6 +22,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,8 +38,9 @@ import java.io.OutputStream;
  * It should create MARC retrieval URLs like the following:
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=mods&query=isbn=$ISBN
  * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=2&recordSchema=marcxml&query=alma.barcode=$BARCODE
+ * https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&startRecord=1&maximumRecords=1&recordSchema=marcxml&query=alma.packageName=Historisk_laerebogssamling
  * To get all query options use:
- * http://bibsys-network.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK?version=1.2&operation=explain
+ * <a href="http://bibsys-network.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK?version=1.2&operation=explain">...</a>
  */
 public class AlmaMetadataRetriever {
     /** The logger.*/
@@ -43,6 +48,9 @@ public class AlmaMetadataRetriever {
 
     /** The search range parameters for retrieving records from Alma. */
     protected static final String ALMA_SEARCH_RANGE = "startRecord=1&maximumRecords=2&";
+    protected static final String ALMA_START_RECORD = "startRecord=";
+    protected static final String ALMA_MAXIMUM_RECORDS = "&maximumRecords=1&";
+
     /** The schema parameters for retrieving MODS records from Alma.*/
     protected static final String ALMA_SCHEMA_MODS = "recordSchema=mods&";
     protected static final String ALMA_SCHEMA_MARCXML = "recordSchema=marcxml&";
@@ -50,11 +58,9 @@ public class AlmaMetadataRetriever {
     /** The base query for performing ISBN search in Alma.*/
     protected static final String ALMA_QUERY_ISBN = "query=isbn=";
     protected static final String ALMA_QUERY_BARCODE = "query=alma.barcode=";
+    protected static final String ALMA_QUERY_ECOLLECTION = "query=alma.packageName=";
 
 
-    /** The XPATH for the number of records.
-     * Using '*' as wildcard for the namespace.*/
-    protected static final String XPATH_NUM_RESULTS = "/*[local-name()='searchRetrieveResponse']/*[local-name()='numberOfRecords']/text()";
     /** The XPATH for the MODS record.
      * Using '*' as wildcard for the namespace.*/
     protected static final String XPATH_MODS_RECORD = "/*[local-name()='searchRetrieveResponse']/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='mods']";
@@ -94,7 +100,7 @@ public class AlmaMetadataRetriever {
     /**
      * Retrieves the MARC metadata for a given barcode from Alma.
      * @param barcode The ID to retrieve the Alma metadata for.
-     * @param out The output stream, where the MODS metadata from Alma will be written.
+     * @param out The output stream, where the MARC metadata from Alma will be written.
      */
     public void retrieveMetadataForBarcode(String barcode, OutputStream out) {
         ArgumentCheck.checkNotNullOrEmpty(barcode, "String barcode");
@@ -107,6 +113,53 @@ public class AlmaMetadataRetriever {
 
 //        extractModsFromAlma(byteArrayInputStream, out);
         extractMarcFromAlma(byteArrayInputStream, out);
+    }
+
+    public ByteArrayInputStream retrieveMetadataForECollection(String eCollection, int recNo, OutputStream out) {
+        ArgumentCheck.checkNotNullOrEmpty(eCollection, "String eCollection");
+        ArgumentCheck.checkNotNull(out, "OutputStream out");
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        retrieveAlmaMetadataECollection(eCollection, recNo, byteArrayOutputStream);
+
+        return  new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+   //     return  byteArrayInputStream;
+
+
+
+        //extractMarcFromAlma(byteArrayInputStream, out);
+    }
+
+    private void retrieveAlmaMetadataECollection(String eCollection, int recNo, OutputStream out) {
+        try {
+            String rN = String.valueOf(recNo);
+            String requestUrl = conf.getAlmaSruSearch() + ALMA_START_RECORD + rN + ALMA_MAXIMUM_RECORDS
+                    + ALMA_SCHEMA_MARCXML + ALMA_QUERY_ECOLLECTION + eCollection;
+            httpClient.retrieveUrlContent(requestUrl, out);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not download the metadata for set '" + eCollection + "'", e);
+        }
+    }
+
+    public String extractXpathValue(InputStream almaInput, String xPath ){
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(almaInput);
+            XPath xpath = xPathFactory.newXPath();
+
+//            return (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
+
+
+            return (String) xpath.evaluate(xPath, doc, XPathConstants.STRING);
+                    //searchRetrieveResponse/records/record/recordData/record/datafield[@tag='856']/subfield[@code='u']/text()
+            ///*[local-name()='searchRetrieveResponse']/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']/*[local-name()='datafield'][@tag='856']/*[local-name()='subfield'][@code='u']/text()
+
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            throw new IllegalStateException("Could not get number of records in Electronic Collection", e);
+        }
     }
 
 //    /**
@@ -159,7 +212,7 @@ public class AlmaMetadataRetriever {
     /**
      * Extracts the MARC record from the Alma record.
      * @param almaInput The input stream with the Alma metadata.
-     * @param marcOutput The output stream with the MODS metadata.
+     * @param marcOutput The output stream with the MARC metadata.
      */
     protected void extractMarcFromAlma(InputStream almaInput, OutputStream marcOutput) {
         try {
@@ -169,12 +222,13 @@ public class AlmaMetadataRetriever {
             Document doc = builder.parse(almaInput);
             XPath xpath = xPathFactory.newXPath();
 
-            String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
-            numRes = numResults;
-            if(!"1".equals(numResults)) {
-                throw new IllegalStateException("Did not receive exactly 1 result from Alma. Received: " + numResults);
+            if(conf.getElectronicCollection() == null) {
+                String numResults = (String) xpath.evaluate(XPATH_NUM_RESULTS, doc, XPathConstants.STRING);
+                numRes = numResults;
+                if(!"1".equals(numResults)) {
+                    throw new IllegalStateException("Did not receive exactly 1 result from Alma. Received: " + numResults);
+                }
             }
-
             XPathExpression marcResultsXpath = xpath.compile(XPATH_MARC_RECORD);
             NodeList marcResults = (NodeList) marcResultsXpath.evaluate(doc, XPathConstants.NODESET);
 

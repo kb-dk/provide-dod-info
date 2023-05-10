@@ -44,6 +44,7 @@ public class DataHandler {
                 FileUtils.moveFile(fromReadme, toReadme);
             }
         } catch (IOException e) {
+            log.warn("readme.txt was not included");
             e.printStackTrace();
         }
     }
@@ -60,6 +61,7 @@ public class DataHandler {
             File toReadme = new File(conf.getTempDir().getAbsolutePath() + "/readme.txt");
             FileUtils.moveFile(fromReadme, toReadme);
         } catch (IOException e) {
+            log.warn("readme.txt was not included");
             e.printStackTrace();
         }
     }

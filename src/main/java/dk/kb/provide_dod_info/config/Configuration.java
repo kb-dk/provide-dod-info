@@ -27,6 +27,8 @@ public class Configuration {
     /** The configuration name for the output file */
     public static final String CONF_OUT_FILE_NAME = "out_file_name";
 
+    public static final String ELECTRONIC_COLLECTION = "electronic_collection";
+
     public static final String CONF_IS_TEST = "is_test";
 
     /** The directory containing the pdf files for which to extract Alma data */
@@ -42,6 +44,8 @@ public class Configuration {
     protected final String almaSruSearchConfiguration;
     /** The name of the Excel file containing the data extracted from Alma */
     protected final String outFileName;
+    protected final String electronicCollection;
+
     /** Check value if it is a test run */
     protected static Boolean isTest;
 
@@ -65,6 +69,7 @@ public class Configuration {
         this.almaSruSearchConfiguration = (String) confMap.get(CONF_ALMA_SRU_SEARCH);
         this.cutYear = (Integer) confMap.get(CONF_CUT_YEAR);
         this.outFileName = (String) confMap.get(CONF_OUT_FILE_NAME);
+        this.electronicCollection = (String) confMap.get(ELECTRONIC_COLLECTION);
         if(confMap.containsKey(CONF_IS_TEST)) {
             isTest = extractBoolean(confMap.get(CONF_IS_TEST));
         } else isTest = false;
@@ -93,6 +98,13 @@ public class Configuration {
     /** @return temp dir where files are placed during run. Removed at exit*/
     public File getTempDir() {
         return tmpDir;
+    }
+
+    /**
+     * @return the elecronic collection for which metadata must be extracted
+     */
+    public String getElectronicCollection() {
+        return electronicCollection;
     }
     /** @return true if it is a test run*/
     public Boolean getIsTest() {

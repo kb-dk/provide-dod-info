@@ -30,10 +30,24 @@ public class Constants {
     public static final String XP_MODS_FIND_YEAR = "/*[local-name()='mods']/*[local-name()='originInfo']/*[local-name()='dateIssued']/text()";
     // ovenstående kan forkortes til "/mods/originInfo/dateIssued/text()"
 
+    /**  The XPATH for extracting the dateIssued from the generated alma marc.xml*/
     public static final String XP_MARC_FIND_YEAR = "recordData/record/controlfield[@tag='008']/text()"; //
 
+    /**  The XPATH for extracting the link to the electronic edition from the alma metadata xml*/
+    public static final String XPATH_LINK_TO_E_EDITION = "/*[local-name()='searchRetrieveResponse']" +
+            "/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']" +
+            "/*[local-name()='datafield'][@tag='856']/*[local-name()='subfield'][@code='u']/text()";
+
+    public static final String XPATH_LINK_TO_ECOLLECTION = "/*[local-name()='searchRetrieveResponse']" +
+            "/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']" +
+            "//*[local-name()='datafield'][@tag='999']/*[local-name()='subfield'][@code='a']/text()";
+
+    public static final String XP_FIND_ECOLLECTION = "recordData/record/datafield[@tag='999']/subfield[@code='a']/text()";
 
 
+    /** The XPATH for the number of records.
+            * Using '*' as wildcard for the namespace.*/
+    public static final String XPATH_NUM_RESULTS = "/*[local-name()='searchRetrieveResponse']/*[local-name()='numberOfRecords']/text()";
 
     /** The XPATH for extracting the Author from the generated alma mods.xml*/
     public static final String XP_MODS_FIND_AUTHOR = "/*[local-name()='mods']/*[local-name()='name']/*[local-name()='namePart']/text()";
@@ -54,7 +68,7 @@ public class Constants {
     public static final String SHEETNAME = "Alma results";
 
     public enum ExtractInfo {
-        YEAR, AUTHOR, TITLE, PUBPLACE, PUBLISHER, CLASSIFICATION
+        YEAR, AUTHOR, TITLE, PUBPLACE, PUBLISHER, CLASSIFICATION, E_COLLECTION
     }
 
 

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
@@ -24,7 +25,6 @@ import java.util.zip.ZipOutputStream;
  * Add specific extracted metadata to Excel file
  * Sort output data in directories
  * Zip data to out.zip
- *
  * Usage:
  * dk.kb.provide-dod-info.AlmaExtract /PATH_TO/provide-dod-info.yml
  *
@@ -75,10 +75,23 @@ public class AlmaExtract {
 
             String yyyyMMdd = DateUtils.getDate();
             String sourceDir = conf.getTempDir().getAbsolutePath();
-            String outZipFilename = "/DOD_OCR_korpus_" + yyyyMMdd + ".zip";
+            String outZipFilename;
+            if(conf.getElectronicCollection() == null){
+                outZipFilename = "/DOD_OCR_korpus_" + yyyyMMdd + ".zip";
+            } else {
+                outZipFilename = "/" + conf.getElectronicCollection() + "_" + yyyyMMdd + ".zip";
+            }
+
             FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + outZipFilename);
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File dirToZip = new File(sourceDir);
+            if(conf.getElectronicCollection() != null) { // Clean up all non e_collection xml files
+                final File[] files = dirToZip.listFiles((dir, name) -> name.matches(".*\\.marc.xml"));
+                if(files != null) {
+                    //noinspection ResultOfMethodCallIgnored
+                    Arrays.stream(files).forEach(File::delete);
+                }
+            }
             ZipUtils.zipFile(dirToZip, dirToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
