@@ -123,12 +123,6 @@ public class AlmaMetadataRetriever {
         retrieveAlmaMetadataECollection(eCollection, recNo, byteArrayOutputStream);
 
         return  new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-   //     return  byteArrayInputStream;
-
-
-
-        //extractMarcFromAlma(byteArrayInputStream, out);
     }
 
     private void retrieveAlmaMetadataECollection(String eCollection, int recNo, OutputStream out) {

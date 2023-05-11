@@ -52,9 +52,9 @@ public class DataHandler {
     public void addReadMe() {
         log.info("addReadMe entered");
         try {
-            //todo: extract version from pom, hmm can't do like readme
+            //todo: extract version from pom, can't do like readme
             UxCmdUtils.execCmd("jar xf " +                               // extract
-                    "provide-dod-info-1.0.4/lib/provide-dod-info-1.0.4.jar " + // fromFile
+                    "provide-dod-info-1.1.0/lib/provide-dod-info-1.1.0.jar " + // fromFile
                     "readme.txt " );                                           // file to extract
             UxCmdUtils.execCmd("chmod -x readme.txt");
             File fromReadme = new File("readme.txt");
@@ -111,7 +111,7 @@ public class DataHandler {
     }
 
     private void moveToSubDirs(Map<String, String> data, String regEx, String subDir) {
-        log.info("moveToSubDirs entered");
+        log.trace("moveToSubDirs entered");
         List<Map.Entry<String, String>> entryList = data.entrySet().stream()
                 .filter(a -> a.getValue().matches(regEx))
                 .collect(Collectors.toList());

@@ -44,6 +44,7 @@ public class Configuration {
     protected final String almaSruSearchConfiguration;
     /** The name of the Excel file containing the data extracted from Alma */
     protected final String outFileName;
+    /** The Electronic Collection to extract metadata for*/
     protected final String electronicCollection;
 
     /** Check value if it is a test run */

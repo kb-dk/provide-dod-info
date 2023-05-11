@@ -39,7 +39,7 @@ import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
 /**
  * The AlmaRetriever
  * It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
- * wanted pdf-files (ends with -color.pdf). (-bw->-color)
+ * wanted pdf-files (ends with -color.pdf).
  * It will then use this barcode to retrieve the MARC data for the related record from Alma in a xml file.
  * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file together with specific
  * metadata from the MARC xml file above.

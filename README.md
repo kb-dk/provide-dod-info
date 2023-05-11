@@ -24,6 +24,7 @@ provide-dod-info:
   cut_year: $ Only files with Publish date older than this will be handled (140 years: e.g in 2021 it must be 1881)
   out_dir: $ The directory where the zipped ouput-files will be placed
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
+  electronic_collection: $ if present, extract only metadata for this collection e.g. Historisk_laerebogssamling
 
 ```
 # Build
