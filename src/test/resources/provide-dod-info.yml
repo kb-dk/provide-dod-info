@@ -1,5 +1,5 @@
 provide-dod-info:
-  corpus_orig_dir: /home/dahe/tmp/provide_dod/pdf
+  corpus_orig_dir: /home/dahe/tmp/provide_dod/pdf_quick_test
   out_dir: tempDir/out
   cut_year: 1883
   out_file_name: AlmaExtractResult.xlsx

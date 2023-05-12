@@ -25,8 +25,9 @@ provide-dod-info:
   out_dir: $ The directory where the zipped ouput-files will be placed
   alma_sru_search: https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&
   electronic_collection: $ if present, extract only metadata for this collection e.g. Historisk_laerebogssamling
-
 ```
+If 'electronic_collection' is present in the yaml file and has a value, then the metadata for the relevant barcodes
+related to that electronic collection is extracted. Otherwise, metadata for _all_ dod items is extracted.
 # Build
 To create the release package, retrieve the project from GitHub and build with:
 ```
