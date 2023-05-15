@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
@@ -23,7 +26,6 @@ import java.util.zip.ZipOutputStream;
  * Add specific extracted metadata to Excel file
  * Sort output data in directories
  * Zip data to out.zip
- *
  * Usage:
  * dk.kb.provide-dod-info.AlmaExtract /PATH_TO/provide-dod-info.yml
  *
@@ -61,9 +63,11 @@ public class AlmaExtract {
             File existingExcelFile = FileUtils.getExistingFile(excelFile);
             String absolutePathExcelFile = existingExcelFile.getAbsolutePath();
 
-//            dataHandler.addReadMeIDE();
-            dataHandler.addReadMe();
-
+            if (conf.getIsTest()) {
+                dataHandler.addReadMeIDE();
+            } else {
+                dataHandler.addReadMe();
+            }
             Map<String, String> values;
             if (StringUtils.isNotEmpty(absolutePathExcelFile)) {
                 values = ExcelUtils.getValues(absolutePathExcelFile);
@@ -72,10 +76,23 @@ public class AlmaExtract {
 
             String yyyyMMdd = DateUtils.getDate();
             String sourceDir = conf.getTempDir().getAbsolutePath();
-            String outZipFilename = "/DOD_OCR_korpus_" + yyyyMMdd + ".zip";
+            String outZipFilename;
+            if(conf.getElectronicCollection() == null){
+                outZipFilename = "/DOD_OCR_korpus_" + yyyyMMdd + ".zip";
+            } else {
+                outZipFilename = "/" + conf.getElectronicCollection() + "_" + yyyyMMdd + ".zip";
+            }
+
             FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + outZipFilename);
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File dirToZip = new File(sourceDir);
+            if(conf.getElectronicCollection() != null) { // Clean up all non e_collection xml files
+                final File[] files = dirToZip.listFiles((dir, name) -> name.matches(".*\\.marc.xml"));
+                if(files != null) {
+                    //noinspection ResultOfMethodCallIgnored
+                    Arrays.stream(files).forEach(File::delete);
+                }
+            }
             ZipUtils.zipFile(dirToZip, dirToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
@@ -87,4 +104,21 @@ public class AlmaExtract {
             throw new IllegalStateException("Something went wrong. Check log for errors", e);
         }
     }
+
+    /**
+     * Retrieves the different kinds of metadata for given barcode.
+     * @param almaMetadataRetriever The Alma metadata retriever.
+     * @param barcode The barcode of the record to retrieve the metadata for.
+     */
+    protected static void retrieveMetadataForBarcode(AlmaMetadataRetriever almaMetadataRetriever,
+                                                     String barcode) throws IOException {
+        log.info("Retrieving the metadata for barcode: '" + barcode + "'");
+        File marcMetadataFile = new File(outputDir, barcode + ".marc.xml");
+        try (OutputStream out = new FileOutputStream(marcMetadataFile)) {
+            almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
+            //Saved to marcMetadataFile
+        }
+        log.info("Metadata for barcode '" + barcode + "' can be found at: " + marcMetadataFile.getAbsolutePath());
+   }
+
 }

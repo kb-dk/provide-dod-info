@@ -20,6 +20,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -36,13 +37,16 @@ import static dk.kb.provide_dod_info.Constants.*;
 import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
 
 /**
- * The AlmaRetriever
- * It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
- * wanted pdf-files (ends with -bw.pdf).
- * It will then use this barcode to retrieve the MARC data for the related record from Alma in a xml file.
+ * The AlmaRetriever has two possible functions depending on whether electronic_collection is present in the yaml file:
+ *  1: It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
+ * wanted pdf-files (ends with -color.pdf).
+ *  2: It will iterate through the ALMA records with the specified electronic collection, extract the barcode related to
+ * the files.
+ *
+ * It will then use the barcode to retrieve the MARC data for the related record from Alma in a xml file.
  * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file together with specific
  * metadata from the MARC xml file above.
- * A txt file is extracted from pdf-files with pdftotext
+ * An OCR txt file is extracted from the pdf-files with 'pdftotext'
  */
 public class AlmaRetriever {
     /** The logger.*/
@@ -61,9 +65,10 @@ public class AlmaRetriever {
     private int row;
     /** The value containing the 140 years cut for records without Copyrights*/
     private final int cutYear;
-
+    /** The year the item was released extracted from Field 008 */
     private String releaseYear;
-
+    /** The electronic collection */
+    private final String eCollection;
     /**
      * Constructor.
      * @param conf The configuration.
@@ -79,6 +84,7 @@ public class AlmaRetriever {
         this.validator = new MetadataValidator();
         this.row = 0;
         this.cutYear = conf.getCutYear();
+        this.eCollection = conf.getElectronicCollection();
     }
 
     public void retrieveAlmaMetadataForFiles(XSSFWorkbook workbook) {
@@ -89,8 +95,11 @@ public class AlmaRetriever {
         data.put(String.valueOf(row), new Object[] {"Barcode", "Alma", "Year", "Place", "Author", "Publisher",
                 "Classification", "Title"});
 
-        traverseFilesInFolder(conf.getCorpusOrigDir(), data);
-
+        if(eCollection == null) {
+            traverseFilesInFolder(conf.getCorpusOrigDir(), data);
+        } else {
+            traversECollection(conf.getCorpusOrigDir(), data);
+        }
         XSSFSheet sheet = workbook.createSheet(SHEETNAME);
         ExcelUtils.populateSheet(sheet, data);
 //        ExcelUtils.setWorkbookFormats(workbook);
@@ -164,6 +173,16 @@ public class AlmaRetriever {
                         res = classification;
                     } else { res = "N/A";}
                     break;
+                case E_COLLECTION:
+                    //WARNING: only searches the first 999 subfield.
+                    // See AlmaMetadataRetriever.extractXpathValue for correct way to do it
+                    log.trace("Extracting ECollection");
+                    XPathExpression eCollectionXpath = xpath.compile(XP_MARC_FIND_ECOLLECTION);
+                    String eCol = (String) eCollectionXpath.evaluate(doc, XPathConstants.STRING);
+                    if (StringUtils.isNotEmpty(eCol)) {
+                        res = eCol;
+                    } else { res = "N/A";}
+                    break;
             }
             log.trace("Returning data: {}", res);
             return res;
@@ -219,11 +238,11 @@ public class AlmaRetriever {
      * @param fileName The file to extract the barcode from
      * @return The barcode
      */
-    protected String getBarcode(String fileName) {
+    protected String getBarcodeFromFileName(String fileName) {
         log.debug("Getting barcode.");
         String barcode;
         try {
-            barcode = fileName.replaceAll("-bw.pdf", "").replaceAll(".pdf", "");
+            barcode = fileName.replaceAll("-color.pdf", "").replaceAll(".pdf", ""); //-bw.pdf->-color.pdf
         }
         catch (Exception e) {
             log.debug("Wrong fileName format. Barcode could not be retrieved, returning 'null'");
@@ -236,14 +255,15 @@ public class AlmaRetriever {
 
     /**
      * Traverses the files in the base directory to retrieve the Alma metadata.
-     * Generate txt-files from the pdf-files
-     * @param dir The base directory for the pdf-files.
+     * @param dir The base directory of the pdf-files.
+     * @param data The data to add to the Excel sheet
      */
     private void traverseFilesInFolder(File dir, Map<String, Object[]> data) {
         FilenameFilter filter = (f, name) -> name.endsWith(".pdf");
         File[] files = dir.listFiles(filter);
 
-        if(files == null ) {
+        assert files != null : "List of files is null";
+        if(Arrays.stream(files).findFirst().isEmpty() ) {
             row++;
             data.put(String.valueOf(row), new Object[] {"", "No files to retrieve and get Alma metadata for in this directory: "
                     + dir.getAbsolutePath()});
@@ -252,11 +272,11 @@ public class AlmaRetriever {
         } else {
             List<String> fileNames = Arrays.stream(files)
                     .map(File::getName)
-                    .filter(name -> name.matches("^(?!.*(-color|_color|_bw|xml)).*$")) // remove unwanted files
+                    .filter(name -> name.matches("^(?!.*(-bw|_color|_bw|xml)).*$")) // remove unwanted files
                     .collect(Collectors.toList());
 
             for(String fileName : fileNames) {
-                String barcode = getBarcode(fileName);
+                String barcode = getBarcodeFromFileName(fileName);
                 if (StringUtils.isNotEmpty(barcode)){
                     retrieveMetadataForBarcode(dir, barcode, data, fileName);
                 }
@@ -265,7 +285,47 @@ public class AlmaRetriever {
     }
 
     /**
-     * Retrieve the metadata for a given barcode.
+     * Traverses the Electronic Collection and returns metadata for the related barcodes that are extracted from the
+     * records in the Electronic Collection
+     * @param dir The base directory of the pdf-files.
+     * @param data The data to add to the Excel sheet
+     */
+    private void traversECollection(File dir, Map<String, Object[]> data) {
+        File metadataFile = new File(conf.getTempDir(), "dummy" + Constants.MARC_METADATA_SUFFIX);
+        try (OutputStream out = new FileOutputStream(metadataFile)) {
+            String noOfRecsInECollection = getAlmaMetadataForECollection(1, out, XPATH_NUM_RESULTS).get(0);
+            int nor = Integer.parseInt(noOfRecsInECollection);
+
+            for (int i = 1; i <= nor ; i++) {
+                List<String> links = getAlmaMetadataForECollection(i, out, XPATH_LINK_TO_E_EDITION);
+
+                for (String link:links) {
+                    String fileName = StringUtils.substringAfterLast(link, "/");
+                    String barcode = StringUtils.substringBefore(fileName, "-");
+                    retrieveMetadataForBarcode(dir, barcode, data, fileName);
+                }
+//                FileUtils.deleteFile(metadataFile);
+            }
+        } catch (IOException ex) {
+            throw new IllegalStateException("traversECollection failed" ,ex);
+        }
+    }
+
+    /**
+     * Get metadata from an electronic ALMA record for a specific XPATH
+     * @param recNo the number of the record to extract metadata for
+     * @param out Output stream to write to
+     * @param xPath The XPATH to the field to retrieve
+     * @return The contents of the XPATH field
+     */
+    private List<String>  getAlmaMetadataForECollection( int recNo, OutputStream out, String xPath) {
+        ByteArrayInputStream is = almaMetadataRetriever.retrieveMetadataForECollection(eCollection, recNo, out);
+
+        return almaMetadataRetriever.extractXpathValue(is, xPath);
+    }
+
+    /**
+     * Retrieve the metadata for a given barcode from the physical record.
      * It retrieves the Alma metadata in MARC format, creates an xml file with the data
      *  and puts the xml file in outDir from Yaml configuration file.
      * @param dir The directory, where the metadata-file will be placed.
@@ -281,7 +341,8 @@ public class AlmaRetriever {
     }
 
     /**
-     * Retrieves the Alma record metadata file for a given barcode.
+     * Retrieves the Alma physical record metadata file for a given barcode.
+     * Generate OCR txt-files from the pdf-files using 'pdftotext'
      * "OK" is written in the excel sheet if success and data is added.
      * A fail message is written in the excel sheet if no data is retrieved.
      * @param barcode The barcode for The Item, whose metadata record will be retrieved.
@@ -292,30 +353,35 @@ public class AlmaRetriever {
     protected void getAlmaMetadataForBarcode(String barcode, File xmlFile, Map<String, Object[]> data, String fileName) throws IOException {
         try (OutputStream out = new FileOutputStream(xmlFile)) {
 
-            // Create BARCODE.marc.xml-file and put retrieved metadata in it
+            // Create $BARCODE.marc.xml-file and put retrieved metadata in it
             almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
-            //Get releaseYear
-            getDataFromXml(xmlFile, YEAR );
+            String eCol = getDataFromXml(xmlFile, E_COLLECTION);
 
-            if (isNumeric(releaseYear)) {
-                if ((Integer.parseInt(releaseYear) < cutYear)) {
-                    row++;
-                    String author = getDataFromXml(xmlFile, AUTHOR);
-                    String title = getDataFromXml(xmlFile, TITLE);
-                    String pubPlace = getDataFromXml(xmlFile, PUBPLACE);
-                    String publisher = getDataFromXml(xmlFile, PUBLISHER);
-                    String classification = getDataFromXml(xmlFile, CLASSIFICATION);
-                    try {
-                        UxCmdUtils.execCmd("pdftotext "                                        // command
-                                + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
-                                + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
-                    } catch (Exception e) {
-                        log.warn("Could not make text file from pdf for: {}\n", fileName);
-                                log.trace("Stack: "); e.printStackTrace();
-                    }
-                    if (FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
-                        data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
-                                classification, title});
+            if((eCollection == null) | (eCol.equals(eCollection))) {
+                //Get releaseYear
+                getDataFromXml(xmlFile, YEAR );
+
+                if (isNumeric(releaseYear)) {
+                    if((Integer.parseInt(releaseYear) < cutYear)) {
+                        row++;
+                        String author = getDataFromXml(xmlFile, AUTHOR);
+                        String title = getDataFromXml(xmlFile, TITLE);
+                        String pubPlace = getDataFromXml(xmlFile, PUBPLACE);
+                        String publisher = getDataFromXml(xmlFile, PUBLISHER);
+                        String classification = getDataFromXml(xmlFile, CLASSIFICATION);
+                        try {
+                            UxCmdUtils.execCmd("pdftotext "                                        // command
+                                    + conf.getCorpusOrigDir().getAbsolutePath() + "/" + fileName + " "   // input file
+                                    + conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt");     // output file
+                        } catch (Exception e) {
+                            log.warn("Could not make text file from pdf for: {}\n", fileName);
+                            log.trace("Stack: ");
+                            e.printStackTrace();
+                        }
+                        if(FileUtils.checkFileExist(conf.getTempDir().getAbsolutePath() + "/" + barcode + ".txt")) {
+                            data.put(String.valueOf(row), new Object[]{barcode, OK, releaseYear, pubPlace, author, publisher,
+                                    classification, title});
+                        }
                     }
                 }
             }

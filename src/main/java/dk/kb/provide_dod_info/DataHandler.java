@@ -44,6 +44,7 @@ public class DataHandler {
                 FileUtils.moveFile(fromReadme, toReadme);
             }
         } catch (IOException e) {
+            log.warn("readme.txt was not included");
             e.printStackTrace();
         }
     }
@@ -51,15 +52,16 @@ public class DataHandler {
     public void addReadMe() {
         log.info("addReadMe entered");
         try {
-            //todo: extract version from pom
+            //todo: extract version from pom, can't do like readme
             UxCmdUtils.execCmd("jar xf " +                               // extract
-                    "provide-dod-info-1.0.3/lib/provide-dod-info-1.0.3.jar " + // fromFile
+                    "provide-dod-info-1.1.0/lib/provide-dod-info-1.1.0.jar " + // fromFile
                     "readme.txt " );                                           // file to extract
             UxCmdUtils.execCmd("chmod -x readme.txt");
             File fromReadme = new File("readme.txt");
             File toReadme = new File(conf.getTempDir().getAbsolutePath() + "/readme.txt");
             FileUtils.moveFile(fromReadme, toReadme);
         } catch (IOException e) {
+            log.warn("readme.txt was not included");
             e.printStackTrace();
         }
     }
@@ -109,7 +111,7 @@ public class DataHandler {
     }
 
     private void moveToSubDirs(Map<String, String> data, String regEx, String subDir) {
-        log.info("moveToSubDirs entered");
+        log.trace("moveToSubDirs entered");
         List<Map.Entry<String, String>> entryList = data.entrySet().stream()
                 .filter(a -> a.getValue().matches(regEx))
                 .collect(Collectors.toList());

@@ -21,7 +21,7 @@ public class TestFileUtils {
 
     public static String readFile(File file) throws IOException {
         try(BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            StringBuffer res = new StringBuffer();
+            StringBuilder res = new StringBuilder();
             String line;
             while((line = br.readLine()) != null) {
                 res.append(line);

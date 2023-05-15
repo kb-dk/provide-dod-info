@@ -30,7 +30,7 @@ public class HttpClientTest extends ExtendedTestCase {
     @Test(expectedExceptions = IOException.class)
     public void testRetrieveUrlContentFailure() throws IOException {
         addDescription("Test the retrieveUrlContent method, when it ");
-        String url = "http://localhost:1234/" + UUID.randomUUID().toString();
+        String url = "http://localhost:1234/" + UUID.randomUUID();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 

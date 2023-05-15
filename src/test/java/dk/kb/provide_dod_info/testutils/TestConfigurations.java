@@ -3,7 +3,6 @@ package dk.kb.provide_dod_info.testutils;
 import dk.kb.provide_dod_info.config.Configuration;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,23 +13,23 @@ import java.util.Map;
  */
 public class TestConfigurations {
 
-    public static Configuration getConfigurationForTest(){
-        try {
-            File baseDir = TestFileUtils.createEmptyDirectory(TestFileUtils.getTempDir().getAbsolutePath());
-            File outDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/out");
-
-            Map<String, Object> confMap = new HashMap<>();
-            confMap.put(Configuration.CONF_EBOOK_FORMATS, Arrays.asList("pdf"));
-            confMap.put(Configuration.CONF_OUT_DIR, outDir.getAbsolutePath());
-
-            confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
-
-
-            return new Configuration(confMap);
-        } catch (Exception e) {
-            throw new RuntimeException("", e);
-        }
-    }
+//    public static Configuration getConfigurationForTest(){
+//        try {
+//            File baseDir = TestFileUtils.createEmptyDirectory(TestFileUtils.getTempDir().getAbsolutePath());
+//            File outDir = TestFileUtils.createEmptyDirectory(baseDir.getAbsolutePath() + "/out");
+//
+//            Map<String, Object> confMap = new HashMap<>();
+//            confMap.put(Configuration.CONF_EBOOK_FORMATS, Arrays.asList("pdf"));
+//            confMap.put(Configuration.CONF_OUT_DIR, outDir.getAbsolutePath());
+//
+//            confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
+//
+//
+//            return new Configuration(confMap);
+//        } catch (Exception e) {
+//            throw new RuntimeException("", e);
+//        }
+//    }
 
 
     public static Configuration getTestConfiguration(){
@@ -45,6 +44,7 @@ public class TestConfigurations {
             confMap.put(Configuration.CONF_CUT_YEAR, 1881);
             confMap.put(Configuration.CONF_OUT_FILE_NAME, "/AlmaExtractResult.xlsx");
             confMap.put(Configuration.CONF_ALMA_SRU_SEARCH, "https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL?version=1.2&operation=searchRetrieve&");
+            confMap.put(Configuration.CONF_IS_TEST, true);
 
             return new Configuration(confMap);
         } catch (Exception e) {

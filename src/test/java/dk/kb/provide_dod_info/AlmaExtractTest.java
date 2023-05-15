@@ -9,7 +9,6 @@ import org.jaccept.structure.ExtendedTestCase;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public class AlmaExtractTest extends ExtendedTestCase {
     @BeforeMethod
     public void setup() {
         TestFileUtils.setup();
-        conf = TestConfigurations.getConfigurationForTest();
+        conf = TestConfigurations.getTestConfiguration();
         AlmaExtract.outputDir = TestFileUtils.getTempDir();
     }
 
@@ -44,8 +43,7 @@ public class AlmaExtractTest extends ExtendedTestCase {
         TestFileUtils.tearDown();
     }
 
-    @Test(expectedExceptions = PreventSystemExit.ExitTrappedException.class)
-    @Ignore
+    @Test(expectedExceptions = IllegalStateException.class)
     public void testNotEnoughArguments() {
         addDescription("Test the case, when not enough argument are given.");
         try {
@@ -57,7 +55,6 @@ public class AlmaExtractTest extends ExtendedTestCase {
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-    @Ignore
     public void testFailToConnect() {
         addDescription("Test the case, when we cannot connect to the Alma server.");
         try {
@@ -68,24 +65,24 @@ public class AlmaExtractTest extends ExtendedTestCase {
         }
     }
 
-//    @Test
-//    public void testRetrieveMetadataForIsbn() throws IOException {
-//        addDescription("Test the retrieveMetadataForIsbn method.");
-//
-//        AlmaMetadataRetriever retriever = mock(AlmaMetadataRetriever.class);
-//        String isbn = UUID.randomUUID().toString();
-//
-//        doAnswer((Answer<Void>) invocation -> {
-//            OutputStream out = (OutputStream) invocation.getArguments()[1];
-//            out.write("THIS IS A TEST".getBytes(StandardCharsets.UTF_8));
-//            out.flush();
-//            return null;
-//        }).when(retriever).retrieveMetadataForISBN(eq(isbn), any(OutputStream.class));
-//
-//        AlmaExtract.retrieveMetadataForIsbn(retriever, isbn);
-//
-//        verify(retriever).retrieveMetadataForISBN(eq(isbn), any(OutputStream.class));
-//
-//        verifyNoMoreInteractions(retriever);
-//    }
+    @Test
+    public void testRetrieveMetadataForBarcode() throws IOException {
+        addDescription("Test the retrieveMetadataForBarcode method.");
+
+        AlmaMetadataRetriever retriever = mock(AlmaMetadataRetriever.class);
+        String barcode = UUID.randomUUID().toString();
+
+        doAnswer((Answer<Void>) invocation -> {
+            OutputStream out = (OutputStream) invocation.getArguments()[1];
+            out.write("THIS IS A TEST".getBytes(StandardCharsets.UTF_8));
+            out.flush();
+            return null;
+        }).when(retriever).retrieveMetadataForBarcode(eq(barcode), any(OutputStream.class));
+
+        AlmaExtract.retrieveMetadataForBarcode(retriever, barcode);
+
+        verify(retriever).retrieveMetadataForBarcode(eq(barcode), any(OutputStream.class));
+
+        verifyNoMoreInteractions(retriever);
+    }
 }

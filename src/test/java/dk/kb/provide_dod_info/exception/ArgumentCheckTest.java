@@ -28,7 +28,7 @@ public class ArgumentCheckTest extends ExtendedTestCase {
     @Test
     public void testConstructorWithoutCause() {
         addDescription("Test the constructor without the cause");
-        String reason = "REASON: " + UUID.randomUUID().toString();
+        String reason = "REASON: " + UUID.randomUUID();
         Exception e = new ArgumentCheck(reason);
         assertEquals(e.getMessage(), reason);
         assertNull(e.getCause());
@@ -37,7 +37,7 @@ public class ArgumentCheckTest extends ExtendedTestCase {
     @Test
     public void testConstructorWithCause() {
         addDescription("Test the constructor with the cause");
-        String reason = "REASON: " + UUID.randomUUID().toString();
+        String reason = "REASON: " + UUID.randomUUID();
         Exception cause = new Exception("cause");
         Exception e = new ArgumentCheck(reason, cause);
         assertEquals(e.getMessage(), reason);
