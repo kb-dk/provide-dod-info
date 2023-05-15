@@ -37,13 +37,16 @@ import static dk.kb.provide_dod_info.Constants.*;
 import static dk.kb.provide_dod_info.Constants.ExtractInfo.*;
 
 /**
- * The AlmaRetriever
- * It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
+ * The AlmaRetriever has two possible functions depending on whether electronic_collection is present in the yaml file:
+ *  1: It will iterate through the received directory containing digitized DOD pdf files, extract the barcode from the
  * wanted pdf-files (ends with -color.pdf).
- * It will then use this barcode to retrieve the MARC data for the related record from Alma in a xml file.
+ *  2: It will iterate through the ALMA records with the specified electronic collection, extract the barcode related to
+ * the files.
+ *
+ * It will then use the barcode to retrieve the MARC data for the related record from Alma in a xml file.
  * The result of the Alma extract -whether it succeeded or failed- is saved to an excel-file together with specific
  * metadata from the MARC xml file above.
- * A txt file is extracted from pdf-files with pdftotext
+ * An OCR txt file is extracted from the pdf-files with 'pdftotext'
  */
 public class AlmaRetriever {
     /** The logger.*/
@@ -62,9 +65,9 @@ public class AlmaRetriever {
     private int row;
     /** The value containing the 140 years cut for records without Copyrights*/
     private final int cutYear;
-
+    /** The year the item was released extracted from Field 008 */
     private String releaseYear;
-
+    /** The electronic collection */
     private final String eCollection;
     /**
      * Constructor.
@@ -299,7 +302,6 @@ public class AlmaRetriever {
                 for (String link:links) {
                     String fileName = StringUtils.substringAfterLast(link, "/");
                     String barcode = StringUtils.substringBefore(fileName, "-");
-
                     retrieveMetadataForBarcode(dir, barcode, data, fileName);
                 }
 //                FileUtils.deleteFile(metadataFile);
@@ -351,7 +353,7 @@ public class AlmaRetriever {
     protected void getAlmaMetadataForBarcode(String barcode, File xmlFile, Map<String, Object[]> data, String fileName) throws IOException {
         try (OutputStream out = new FileOutputStream(xmlFile)) {
 
-            // Create BARCODE.marc.xml-file and put retrieved metadata in it
+            // Create $BARCODE.marc.xml-file and put retrieved metadata in it
             almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
             String eCol = getDataFromXml(xmlFile, E_COLLECTION);
 

@@ -27,8 +27,11 @@ public class Configuration {
     /** The configuration name for the output file */
     public static final String CONF_OUT_FILE_NAME = "out_file_name";
 
+    /** The configuration value for which ALMA Electronic Configuration to extract. All DOD is extracted
+     * if not present or empty */
     public static final String ELECTRONIC_COLLECTION = "electronic_collection";
 
+    /** If present and true, used for testing*/
     public static final String CONF_IS_TEST = "is_test";
 
     /** The directory containing the pdf files for which to extract Alma data */
