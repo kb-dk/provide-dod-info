@@ -12,13 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
+
+import static dk.kb.provide_dod_info.utils.FileUtils.deleteDirectory;
 
 
 /**
@@ -86,22 +87,31 @@ public class AlmaExtract {
             FileOutputStream fos = new FileOutputStream(conf.getOutDir().getAbsolutePath() + outZipFilename);
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File dirToZip = new File(sourceDir);
-            if(conf.getElectronicCollection() != null) { // Clean up all non e_collection xml files
-                final File[] files = dirToZip.listFiles((dir, name) -> name.matches(".*\\.marc.xml"));
-                if(files != null) {
-                    //noinspection ResultOfMethodCallIgnored
-                    Arrays.stream(files).forEach(File::delete);
-                }
-            }
+            removeUnwantedFiles(conf, dirToZip);
+
             ZipUtils.zipFile(dirToZip, dirToZip.getName(), zipOut);
             zipOut.close();
             fos.close();
-            FileUtils.deleteDirectory( conf.getTempDir());
+            deleteDirectory( conf.getTempDir());
             log.debug("****************Output ready***************");
             System.exit(0); // make sure the program exits
 
         } catch (Exception e ) {
             throw new IllegalStateException("Something went wrong. Check log for errors", e);
+        }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static void removeUnwantedFiles(Configuration conf, File dirToZip) {
+        if(conf.getElectronicCollection() != null) { // Clean up all non e_collection xml files
+            final File[] files = dirToZip.listFiles((dir, name) -> name.matches(".*\\.marc.xml"));
+            if(files != null) {
+                Arrays.stream(files).forEach(File::delete);
+            }
+        }
+        final File[] files = dirToZip.listFiles((dir, name) -> name.matches(".*\\.zip"));
+        if(files != null) { // clean up remains from previous failed runs
+            Arrays.stream(files).forEach(File::delete);
         }
     }
 
