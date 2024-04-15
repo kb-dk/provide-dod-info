@@ -42,8 +42,9 @@ public class Constants {
             "/*[local-name()='records']/*[local-name()='record']/*[local-name()='recordData']/*[local-name()='record']" +
             "/*[local-name()='datafield'][@tag='999']/*[local-name()='subfield'][@code='a']/text()";
 
-    public static final String XP_MARC_FIND_ECOLLECTION = "recordData/record/datafield[@tag='999']/subfield[@code='a']/text()";
-
+    // Looks like SRU does not retrieve 900 fields anymore (2024-04-15)
+//    public static final String XP_MARC_FIND_ECOLLECTION999 = "recordData/record/datafield[@tag='999']/subfield[@code='a']/text()";
+//    public static final String XP_MARC_FIND_ECOLLECTION997 = "recordData/record/datafield[@tag='997']/subfield[@code='a']/text()";
 
     /** The XPATH for the number of records.
             * Using '*' as wildcard for the namespace.*/

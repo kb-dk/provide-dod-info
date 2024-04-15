@@ -4,6 +4,7 @@ import dk.kb.provide_dod_info.config.Configuration;
 import dk.kb.provide_dod_info.exception.ArgumentCheck;
 import dk.kb.provide_dod_info.metadata.AlmaMetadataRetriever;
 import dk.kb.provide_dod_info.metadata.MetadataValidator;
+import dk.kb.provide_dod_info.utils.DateUtils;
 import dk.kb.provide_dod_info.utils.ExcelUtils;
 import dk.kb.provide_dod_info.utils.FileUtils;
 import dk.kb.provide_dod_info.utils.UxCmdUtils;
@@ -83,7 +84,9 @@ public class AlmaRetriever {
         this.xPathfactory = XPathFactory.newInstance();
         this.validator = new MetadataValidator();
         this.row = 0;
-        this.cutYear = conf.getCutYear();
+        int cY = Integer.parseInt(DateUtils.getYear())-141;
+        // Make sure cutYear is at least 140 years ago:
+        this.cutYear = (conf.getCutYear() >= cY ) ? cY : conf.getCutYear();
         this.eCollection = conf.getElectronicCollection();
     }
 
@@ -173,16 +176,16 @@ public class AlmaRetriever {
                         res = classification;
                     } else { res = "N/A";}
                     break;
-                case E_COLLECTION:
-                    //WARNING: only searches the first 999 subfield.
-                    // See AlmaMetadataRetriever.extractXpathValue for correct way to do it
-                    log.trace("Extracting ECollection");
-                    XPathExpression eCollectionXpath = xpath.compile(XP_MARC_FIND_ECOLLECTION);
-                    String eCol = (String) eCollectionXpath.evaluate(doc, XPathConstants.STRING);
-                    if (StringUtils.isNotEmpty(eCol)) {
-                        res = eCol;
-                    } else { res = "N/A";}
-                    break;
+//                case E_COLLECTION:
+//                    //WARNING: only searches the first 999 subfield.
+//                    // See AlmaMetadataRetriever.extractXpathValue for correct way to do it
+//                    log.trace("Extracting ECollection");
+//                    XPathExpression eCollectionXpath = xpath.compile(XP_MARC_FIND_ECOLLECTION);
+//                    String eCol = (String) eCollectionXpath.evaluate(doc, XPathConstants.STRING);
+//                    if (StringUtils.isNotEmpty(eCol)) {
+//                        res = eCol;
+//                    } else { res = "N/A";}
+//                    break;
             }
             log.trace("Returning data: {}", res);
             return res;
@@ -304,7 +307,6 @@ public class AlmaRetriever {
                     String barcode = StringUtils.substringBefore(fileName, "-");
                     retrieveMetadataForBarcode(dir, barcode, data, fileName);
                 }
-//                FileUtils.deleteFile(metadataFile);
             }
         } catch (IOException ex) {
             throw new IllegalStateException("traversECollection failed" ,ex);
@@ -336,7 +338,7 @@ public class AlmaRetriever {
             getAlmaMetadataForBarcode(barcode, metadataFile, data, fileName);
         } catch (Exception e) {
             log.info("Failure while trying to retrieve the Alma metadata for the directory '"
-                + dir.getAbsolutePath() + "'" + "Barcode: " + barcode, e);
+                + dir.getAbsolutePath() + "'" + " Barcode: " + barcode, e);
         }
     }
 
@@ -355,9 +357,9 @@ public class AlmaRetriever {
 
             // Create $BARCODE.marc.xml-file and put retrieved metadata in it
             almaMetadataRetriever.retrieveMetadataForBarcode(barcode, out);
-            String eCol = getDataFromXml(xmlFile, E_COLLECTION);
+//            String eCol = getDataFromXml(xmlFile, E_COLLECTION);
 
-            if((eCollection == null) | (eCol.equals(eCollection))) {
+//            if((eCollection == null) || (eCol.equals(eCollection))) {
                 //Get releaseYear
                 getDataFromXml(xmlFile, YEAR );
 
@@ -384,7 +386,7 @@ public class AlmaRetriever {
                         }
                     }
                 }
-            }
+//            }
             out.flush();
         } finally {
             if (isNumeric(releaseYear)) {
